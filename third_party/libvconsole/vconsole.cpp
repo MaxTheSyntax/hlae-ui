@@ -1,5 +1,4 @@
 #include "vconsole.h"
-#include <iostream>
 #include <cstring>
 
 VConsole::VConsole() : clientSocket(INVALID_SOCKET)

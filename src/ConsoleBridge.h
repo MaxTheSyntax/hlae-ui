@@ -5,7 +5,7 @@
 #include <QString>
 #include <QtQml/qqmlregistration.h>
 
-#include "third_party/libvconsole/vconsole.h"
+#include <libvconsole/vconsole.h>
 
 class ConsoleBridge : public QObject
 {

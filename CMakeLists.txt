@@ -8,6 +8,25 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.10)
 
+add_library(libvconsole STATIC
+    third_party/libvconsole/vconsole.cpp
+)
+
+target_include_directories(libvconsole
+    SYSTEM PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+)
+
+if(MSVC)
+    target_compile_options(libvconsole PRIVATE /w)
+else()
+    target_compile_options(libvconsole PRIVATE -w)
+endif()
+
+if(WIN32)
+    target_link_libraries(libvconsole PRIVATE ws2_32)
+endif()
+
 qt_add_executable(appqt_hlae
     main.cpp
 )
@@ -41,14 +60,12 @@ qt_add_qml_module(appqt_hlae
         main.cpp
         src/ConsoleBridge.cpp
         src/ConsoleBridge.h
-        third_party/libvconsole/platform.h
-        third_party/libvconsole/messages.h
-        third_party/libvconsole/vconsole.cpp
-        third_party/libvconsole/vconsole.h
 )
 
 target_include_directories(appqt_hlae
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -63,12 +80,10 @@ set_target_properties(appqt_hlae PROPERTIES
 )
 
 target_link_libraries(appqt_hlae
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
+        libvconsole
 )
-
-if(WIN32)
-    target_link_libraries(appqt_hlae PRIVATE ws2_32)
-endif()
 
 install(TARGETS appqt_hlae
     BUNDLE DESTINATION .

@@ -8,60 +8,55 @@ Item {
         id: consoleBridge
     }
 
-    Rectangle {
+    ColumnLayout {
         anchors.fill: parent
-        color: Colors.background
+        anchors.margins: 24
+        spacing: 10
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 10
+        Label {
+            text: qsTr("Source 2 Console")
+            color: Colors.text
+            font.pixelSize: 20
+            font.bold: true
+        }
 
-            Label {
-                text: qsTr("Source Console")
-                color: Colors.text
-                font.pixelSize: 20
-                font.bold: true
+        TextField {
+            id: commandInput
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 44
+            placeholderText: qsTr("Type a console command")
+            color: Colors.text
+            placeholderTextColor: Colors.mutedText
+            selectionColor: Colors.accent
+            selectedTextColor: Colors.background
+            font.pixelSize: 16
+
+            background: Rectangle {
+                color: Colors.secondaryBackground
+                border.color: commandInput.activeFocus ? Colors.accent : Colors.hoverBackground
+                border.width: 1
+                radius: 4
             }
 
-            TextField {
-                id: commandInput
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: 44
-                placeholderText: qsTr("Type a console command")
-                color: Colors.text
-                placeholderTextColor: Colors.mutedText
-                selectionColor: Colors.accent
-                selectedTextColor: Colors.background
-                font.pixelSize: 16
-
-                background: Rectangle {
-                    color: Colors.secondaryBackground
-                    border.color: commandInput.activeFocus ? Colors.accent : Colors.hoverBackground
-                    border.width: 1
-                    radius: 6
-                }
-
-                onAccepted: {
-                    const command = text
-                    clear()
-                    consoleBridge.sendCommand(command)
-                }
+            onAccepted: {
+                const command = text
+                clear()
+                consoleBridge.sendCommand(command)
             }
+        }
 
-            Label {
-                Layout.fillWidth: true
-                text: consoleBridge.statusMessage
-                color: Colors.mutedText
-                font.pixelSize: 13
-                elide: Text.ElideRight
-                visible: text.length > 0
-            }
+        Label {
+            Layout.fillWidth: true
+            text: consoleBridge.statusMessage
+            color: Colors.mutedText
+            font.pixelSize: 13
+            wrapMode: Text.Wrap
+            visible: text.length > 0
+        }
 
-            Item {
-                Layout.fillHeight: true
-            }
+        Item {
+            Layout.fillHeight: true
         }
     }
 }
