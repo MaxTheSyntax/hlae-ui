@@ -60,6 +60,9 @@ qt_add_qml_module(appqt_hlae
         main.cpp
         src/ConsoleBridge.cpp
         src/ConsoleBridge.h
+        src/PathValidator.cpp
+        src/PathValidator.h
+        QML_FILES qml/pages/Launcher.qml
 )
 
 target_include_directories(appqt_hlae
