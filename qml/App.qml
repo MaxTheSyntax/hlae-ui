@@ -14,7 +14,8 @@ RowLayout {
     property var pageNames: [
         "Overview", 
         "Streams", 
-        "cmd Timeline", 
+        "cmd Timeline",
+        "Console",
         "Settings"
     ]
 
@@ -113,6 +114,7 @@ RowLayout {
         Overview {}
         Streams {}
         Timeline {}
+        Console {}
         Settings {}
     }
 }

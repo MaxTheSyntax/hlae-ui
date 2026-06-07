@@ -17,6 +17,13 @@ set_source_files_properties(
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
+set_source_files_properties(
+    third_party/libvconsole/messages.h
+    third_party/libvconsole/platform.h
+    third_party/libvconsole/vconsole.h
+    PROPERTIES SKIP_AUTOMOC ON
+)
+
 qt_add_qml_module(appqt_hlae
     URI hlae_ui
 
@@ -24,13 +31,24 @@ qt_add_qml_module(appqt_hlae
         Main.qml
         qml/App.qml
         qml/pages/Overview.qml
+        qml/pages/Console.qml
+        qml/pages/Settings.qml
+        qml/pages/Streams.qml
+        qml/pages/Timeline.qml
         qml/themes/Colors.qml
 
     SOURCES
         main.cpp
-        QML_FILES qml/pages/Streams.qml
-        QML_FILES qml/pages/Timeline.qml
-        QML_FILES qml/pages/Settings.qml
+        src/ConsoleBridge.cpp
+        src/ConsoleBridge.h
+        third_party/libvconsole/platform.h
+        third_party/libvconsole/messages.h
+        third_party/libvconsole/vconsole.cpp
+        third_party/libvconsole/vconsole.h
+)
+
+target_include_directories(appqt_hlae
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -47,6 +65,10 @@ set_target_properties(appqt_hlae PROPERTIES
 target_link_libraries(appqt_hlae
     PRIVATE Qt6::Quick
 )
+
+if(WIN32)
+    target_link_libraries(appqt_hlae PRIVATE ws2_32)
+endif()
 
 install(TARGETS appqt_hlae
     BUNDLE DESTINATION .
