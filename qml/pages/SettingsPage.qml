@@ -71,7 +71,9 @@ Item {
                     return
                 }
 
-                if (text.includes("-w") || text.includes("-h")) {
+                const args = text.split(" ")
+
+                if (args.includes("-w") || args.includes("-h")) {
                     hasError = true
                     validationError = "Set window dimensions in the launcher."
                 } else if (!text.includes("-insecure")) {

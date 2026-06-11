@@ -6,6 +6,11 @@ import hlae_ui
 import "../controls"
 
 Item {
+    id: launcher
+
+    property string runnerError: ""
+    property bool runnerHasError: false
+
     Settings {
         id: settings
 
@@ -32,13 +37,16 @@ Item {
                 color: "#0c57ad"
 
                 onClicked: {
-                    hlaeRunner.run(
+                    const result = hlaeRunner.run(
                         settings.hlaeExecutablePath,
                         settings.cs2ExecutablePath,
-                        ["C:\Program Files (x86)\HLAE\x64\AfxHookSource2.dll"],
+                        ["C:\\Program Files (x86)\\HLAE\\x64\\AfxHookSource2.dll"],
                         settings.launchArguments,
-                        ["SteamPath=C:\Program Files (x86)\Steam", "SteamClientLaunch=1", "SteamGameId=730", "SteamAppId=730", "SteamOverlayGameId=730"]
+                        ["SteamPath=C:\\Program Files (x86)\\Steam", "SteamClientLaunch=1", "SteamGameId=730", "SteamAppId=730", "SteamOverlayGameId=730"]
                     )
+
+                    runnerHasError = result.success
+                    runnerError = result.error
                 }
             }
 
@@ -47,6 +55,13 @@ Item {
                 text: "Kill"
                 color: "#8c150a"
             }
+        }
+
+        Label {
+            text: runnerError
+            color: "#ef4444"
+            font.pixelSize: 14
+            visible: runnerHasError
         }
 
         Item {

@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QVariantMap>
 
 PathValidator::PathValidator(QObject *parent)
     : QObject(parent)
