@@ -3,10 +3,13 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QtQml/qqmlregistration.h>
 
 class HlaeRunner : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+
 public:
     explicit HlaeRunner(QObject *parent = nullptr);
 
