@@ -66,6 +66,7 @@ qt_add_qml_module(appqt_hlae
         src/PathValidator.h
         QML_FILES qml/pages/Launcher.qml
         QML_FILES qml/controls/AppButton.qml
+        SOURCES src/HlaeRunner.h src/HlaeRunner.cpp
 )
 
 target_include_directories(appqt_hlae
