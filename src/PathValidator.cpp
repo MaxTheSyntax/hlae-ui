@@ -8,7 +8,7 @@ PathValidator::PathValidator(QObject *parent)
 {
 }
 
-QVariantMap PathValidator::containsHlaeExecutable(const QString &path) const
+QVariantMap PathValidator::containsExecutable(const QString &path, const QString &executable) const
 {
     const QFileInfo fileInfo(path.trimmed());
 
@@ -25,7 +25,7 @@ QVariantMap PathValidator::containsHlaeExecutable(const QString &path) const
             };
         }
     } else if (fileInfo.isDir()) {
-        const QFileInfo executableInfo(QDir(fileInfo.absoluteFilePath()).filePath("HLAE.exe"));
+        const QFileInfo executableInfo(QDir(fileInfo.absoluteFilePath()).filePath(executable));
         if (executableInfo.isFile() && executableInfo.isExecutable()) {
             return {
                 {"valid", true},
@@ -34,13 +34,13 @@ QVariantMap PathValidator::containsHlaeExecutable(const QString &path) const
         } else {
             return {
                 {"valid", false},
-                {"error", tr("The provided directory does not contain an executable HLAE.exe file.")},
+                {"error", tr("The provided directory does not contain an executable executable file.")},
             };
         }
     }
 
     return {
         {"valid", false},
-        {"error", tr("Unable to find the HLAE executable.")},
+        {"error", tr("Unable to find the %1 executable.").arg(executable)},
     };
 }

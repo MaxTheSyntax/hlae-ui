@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import hlae_ui
+import "../controls"
 
 Item {
     ConsoleBridge {
@@ -20,24 +21,13 @@ Item {
             font.bold: true
         }
 
-        TextField {
+        AppTextField {
             id: commandInput
 
             Layout.fillWidth: true
             Layout.preferredHeight: 44
             placeholderText: qsTr("Type a console command")
-            color: Colors.text
-            placeholderTextColor: Colors.mutedText
-            selectionColor: Colors.accent
-            selectedTextColor: Colors.background
             font.pixelSize: 16
-
-            background: Rectangle {
-                color: Colors.secondaryBackground
-                border.color: commandInput.activeFocus ? Colors.accent : Colors.hoverBackground
-                border.width: 1
-                radius: 4
-            }
 
             onAccepted: {
                 const command = text

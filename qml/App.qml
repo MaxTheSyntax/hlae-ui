@@ -12,6 +12,7 @@ RowLayout {
 
     property int currentPageIdx: 0
     property var pageNames: [
+        "Launcher",
         "Overview", 
         "Streams", 
         "cmd Timeline",
@@ -111,6 +112,7 @@ RowLayout {
         Layout.fillHeight: true
         currentIndex: app.currentPageIdx
 
+        Launcher {}
         Overview {}
         Streams {}
         Timeline {}

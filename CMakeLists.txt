@@ -55,6 +55,8 @@ qt_add_qml_module(appqt_hlae
         qml/pages/Streams.qml
         qml/pages/Timeline.qml
         qml/themes/Colors.qml
+        qml/controls/AppTextField.qml
+        qml/controls/AppSettingTextField.qml
 
     SOURCES
         main.cpp
@@ -63,6 +65,7 @@ qt_add_qml_module(appqt_hlae
         src/PathValidator.cpp
         src/PathValidator.h
         QML_FILES qml/pages/Launcher.qml
+        QML_FILES qml/controls/AppButton.qml
 )
 
 target_include_directories(appqt_hlae

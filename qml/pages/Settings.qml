@@ -1,9 +1,16 @@
+import QtCore
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import hlae_ui
+import "../controls"
 
 Item {
+    Settings {
+        property alias hlaeExecutablePath: hlaeExe.text
+        property alias cs2ExecutablePath: cs2Exe.text
+        property alias launchArguments: launchArguments.text
+    }
+
     PathValidator {
         id: pathValidator
     }
@@ -13,81 +20,63 @@ Item {
         anchors.margins: 24
         spacing: 10
 
-        GridLayout {
+        AppSettingTextField {
+            id: hlaeExe
+
             Layout.fillWidth: true
-            columns: 2
-            columnSpacing: 10
-            rowSpacing: 4
+            labelText: qsTr("HLAE.exe file location")
+            placeholderText: qsTr("C:\\path\\to\\HLAE\\HLAE.exe")
+            text: "C:\\Program Files (x86)\\HLAE\\HLAE.exe"
 
-            Column {
-                Label {
-                    text: qsTr("HLAE.exe file location")
-                    font.pixelSize: 16
+            onVerifiedEdit: {
+                if (text === "") {
+                    return
                 }
 
-                Label {
-                    text: hlaeExe.validationError
-                    color: "#ef4444"
-                    font.pixelSize: 12
-                    visible: hlaeExe.isInvalid
-                }
+                const result = pathValidator.containsExecutable(text, "HLAE.exe")
+                hasError = !result.valid
+                validationError = result.error
             }
+        }
 
-            TextField {
-                id: hlaeExe
+        AppSettingTextField {
+            id: cs2Exe
 
-                Layout.fillWidth: true
-                Layout.preferredHeight: 36
-                placeholderText: qsTr("C:\\path\\to\\HLAE\\HLAE.exe")
-                color: Colors.text
-                placeholderTextColor: Colors.mutedText
-                selectionColor: Colors.accent
-                selectedTextColor: Colors.background
-                font.pixelSize: 14
-                property bool isInvalid: false
-                property string validationError: ""
+            Layout.fillWidth: true
+            labelText: qsTr("cs2.exe file location")
+            placeholderText: qsTr("C:\\path\\to\\cs2.exe")
+            text: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Global Offensive\\game\\bin\\win64\\cs2.exe"
 
-                function validatePath() {
-                    validationTimer.stop()
-
-                    if (text === "") {
-                        return
-                    }
-
-                    const result = pathValidator.containsHlaeExecutable(text)
-                    isInvalid = !result.valid
-                    validationError = result.error
-
-                    if (!isInvalid) {
-                        // TODO: Handle a successfully validated HLAE executable path.
-                        console.log("looks good")
-                    }
+            onVerifiedEdit: {
+                if (text === "") {
+                    return
                 }
 
-                background: Rectangle {
-                    color: Colors.secondaryBackground
-                    border.color: hlaeExe.isInvalid
-                                  ? "#ef4444"
-                                  : (hlaeExe.activeFocus ? Colors.accent : Colors.hoverBackground)
-                    border.width: 1
-                    radius: 4
+                const result = pathValidator.containsExecutable(text, "cs2.exe")
+                hasError = !result.valid
+                validationError = result.error
+            }
+        }
+
+        AppSettingTextField {
+            id: launchArguments
+
+            Layout.fillWidth: true
+            labelText: qsTr("Game launch arguments")
+            placeholderText: qsTr("-steam -insecure ...")
+            text: "-steam -insecure +sv_lan 1 -window -console -novid -afxDisableSteamStorage"
+
+            onVerifiedEdit: {
+                if (text === "") {
+                    return
                 }
 
-                onTextEdited: {
-                    isInvalid = false
-                    validationError = ""
-                    validationTimer.restart()
-                }
-                onActiveFocusChanged: {
-                    if (!activeFocus) {
-                        validatePath()
-                    }
-                }
-
-                Timer {
-                    id: validationTimer
-                    interval: 1000
-                    onTriggered: hlaeExe.validatePath()
+                if (text.includes("-w") || text.includes("-h")) {
+                    hasError = true
+                    validationError = "Set window dimensions in the launcher."
+                } else if (!text.includes("-insecure")) {
+                    hasError = true
+                    validationError = "Please set the -insecure flag."
                 }
             }
         }
