@@ -112,11 +112,11 @@ RowLayout {
         Layout.fillHeight: true
         currentIndex: app.currentPageIdx
 
-        Launcher {}
-        Overview {}
-        Streams {}
-        Timeline {}
-        Console {}
-        Settings {}
+        LauncherPage {}
+        OverviewPage {}
+        StreamsPage {}
+        TimelinePage {}
+        ConsolePage {}
+        SettingsPage {}
     }
 }

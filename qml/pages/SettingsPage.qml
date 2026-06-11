@@ -8,7 +8,7 @@ Item {
     Settings {
         property alias hlaeExecutablePath: hlaeExe.text
         property alias cs2ExecutablePath: cs2Exe.text
-        property alias launchArguments: launchArguments.text
+        property alias launchArguments: launchArgumentsField.text
     }
 
     PathValidator {
@@ -59,7 +59,7 @@ Item {
         }
 
         AppSettingTextField {
-            id: launchArguments
+            id: launchArgumentsField
 
             Layout.fillWidth: true
             labelText: qsTr("Game launch arguments")

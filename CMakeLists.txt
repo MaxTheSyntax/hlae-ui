@@ -49,11 +49,11 @@ qt_add_qml_module(appqt_hlae
     QML_FILES
         Main.qml
         qml/App.qml
-        qml/pages/Overview.qml
-        qml/pages/Console.qml
-        qml/pages/Settings.qml
-        qml/pages/Streams.qml
-        qml/pages/Timeline.qml
+        qml/pages/OverviewPage.qml
+        qml/pages/ConsolePage.qml
+        qml/pages/SettingsPage.qml
+        qml/pages/StreamsPage.qml
+        qml/pages/TimelinePage.qml
         qml/themes/Colors.qml
         qml/controls/AppTextField.qml
         qml/controls/AppSettingTextField.qml
@@ -64,7 +64,7 @@ qt_add_qml_module(appqt_hlae
         src/ConsoleBridge.h
         src/PathValidator.cpp
         src/PathValidator.h
-        QML_FILES qml/pages/Launcher.qml
+        QML_FILES qml/pages/LauncherPage.qml
         QML_FILES qml/controls/AppButton.qml
         SOURCES src/HlaeRunner.h src/HlaeRunner.cpp
 )
