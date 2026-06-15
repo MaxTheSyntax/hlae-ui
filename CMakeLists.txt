@@ -43,6 +43,12 @@ set_source_files_properties(
     PROPERTIES SKIP_AUTOMOC ON
 )
 
+file(GLOB MAP_ASSET_FILES CONFIGURE_DEPENDS
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    assets/images/maps/icons/*
+    assets/images/maps/previews/*
+)
+
 qt_add_qml_module(appqt_hlae
     URI hlae_ui
 
@@ -67,6 +73,10 @@ qt_add_qml_module(appqt_hlae
         QML_FILES qml/pages/LauncherPage.qml
         QML_FILES qml/controls/AppButton.qml
         SOURCES src/HlaeRunner.h src/HlaeRunner.cpp
+
+    RESOURCES
+        ${MAP_ASSET_FILES}
+        QML_FILES
 )
 
 target_include_directories(appqt_hlae
