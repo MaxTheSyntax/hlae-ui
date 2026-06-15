@@ -64,6 +64,61 @@ Item {
             visible: runnerHasError
         }
 
+        ComboBox {
+            id: projectSelect
+
+            model: ["Epic edit", "Inferno Montage"]
+
+            Layout.fillWidth: true;
+            Layout.preferredHeight: 50
+
+            contentItem: RowLayout {
+                Image {
+                    source: "qrc:/qt/qml/hlae_ui/assets/images/maps/icons/de_inferno.svg"
+                    Layout.preferredHeight: 30
+                    Layout.preferredWidth: 30
+                    Layout.leftMargin: 10
+
+                    sourceSize.width: 30 * Screen.devicePixelRatio
+                    sourceSize.height: 30 * Screen.devicePixelRatio
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
+
+                Text {
+                    text: projectSelect.currentText
+                    font.pixelSize: 16
+                    color: Colors.text
+                    leftPadding: 5
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                }
+            }
+
+            indicator: Text {
+                text: "⌄"
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: 12
+            }
+
+            background: Rectangle {
+                border.color: Colors.secondaryBackground
+                color: Colors.panelBackground
+                radius: 8
+                border.width: 1
+
+            }
+
+            delegate: ItemDelegate {
+                text: modelData
+                width: parent.width
+                height: 40
+            }
+        }
+
         Item {
             Layout.fillHeight: true
         }
