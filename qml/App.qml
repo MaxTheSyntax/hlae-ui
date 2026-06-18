@@ -2,16 +2,25 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import hlae_ui
 import "themes"
 import "pages"
 
 RowLayout {
     id: app
+
+    property string activeProject
+
     anchors.fill: parent
     spacing: 0
 
+    ConsoleBridge {
+        id: sourceConsole
+    }
+
     property int currentPageIdx: 0
     property var pageNames: [
+        "Launcher",
         "Overview", 
         "Streams", 
         "cmd Timeline",
@@ -111,10 +120,22 @@ RowLayout {
         Layout.fillHeight: true
         currentIndex: app.currentPageIdx
 
-        Overview {}
-        Streams {}
-        Timeline {}
-        Console {}
-        Settings {}
+        LauncherPage {
+            id: launcherPage
+
+            consoleBridge: sourceConsole
+            onProjectLoaded: function(projectId) {
+                app.activeProject = projectId
+            }
+        }
+        OverviewPage {}
+        StreamsPage {}
+        TimelinePage {}
+        ConsolePage {
+            consoleBridge: sourceConsole
+        }
+        SettingsPage {
+            onRefreshProjectsRequested: launcherPage.refreshProjects()
+        }
     }
 }
