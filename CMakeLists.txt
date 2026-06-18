@@ -33,6 +33,7 @@ qt_add_executable(appqt_hlae
 
 set_source_files_properties(
     qml/themes/Colors.qml
+    qml/themes/Sizes.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
@@ -49,6 +50,9 @@ file(GLOB MAP_ASSET_FILES CONFIGURE_DEPENDS
     assets/images/maps/previews/*
 )
 
+
+# DO NOT TRY ORGANISING THIS!!
+# Qt Creator does not care about this looking nice so it *will* slowly mess it up the more files are added
 qt_add_qml_module(appqt_hlae
     URI hlae_ui
 
@@ -61,8 +65,13 @@ qt_add_qml_module(appqt_hlae
         qml/pages/StreamsPage.qml
         qml/pages/TimelinePage.qml
         qml/themes/Colors.qml
+        qml/themes/Sizes.qml
         qml/controls/AppTextField.qml
+        qml/controls/AppLabelTextField.qml
+        qml/controls/AppValidatedTextField.qml
         qml/controls/AppSettingTextField.qml
+        qml/pages/LauncherPage.qml
+        qml/controls/AppButton.qml
 
     SOURCES
         main.cpp
@@ -70,13 +79,16 @@ qt_add_qml_module(appqt_hlae
         src/ConsoleBridge.h
         src/PathValidator.cpp
         src/PathValidator.h
-        QML_FILES qml/pages/LauncherPage.qml
-        QML_FILES qml/controls/AppButton.qml
-        SOURCES src/HlaeRunner.h src/HlaeRunner.cpp
+        src/HlaeRunner.h
+        src/HlaeRunner.cpp
+        src/ProjectManager.h
+        src/ProjectManager.cpp
 
     RESOURCES
         ${MAP_ASSET_FILES}
-        QML_FILES
+        assets/images/icons/dropdown.svg
+        assets/images/icons/new.svg
+        RESOURCES assets/images/icons/mapIcon.svg
 )
 
 target_include_directories(appqt_hlae

@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtCore
 import QtQuick
 import QtQuick.Controls
@@ -8,8 +10,13 @@ import "../controls"
 Item {
     id: launcher
 
+    required property var consoleBridge
+
     property string runnerError: ""
     property bool runnerHasError: false
+    property string projectError: ""
+
+    signal projectLoaded(string projectId)
 
     Settings {
         id: settings
@@ -21,6 +28,197 @@ Item {
 
     HlaeRunner {
         id: hlaeRunner
+    }
+
+    ProjectManager {
+        id: projectManager
+    }
+
+    PathValidator {
+        id: pathValidator
+    }
+
+    function projectIconSource(mapName) {
+        if (mapName === undefined || mapName === "") {
+            return "qrc:/qt/qml/hlae_ui/assets/images/maps/icons/unknown.png"
+        }
+
+        return "qrc:/qt/qml/hlae_ui/assets/images/maps/icons/" + mapName + ".svg"
+    }
+
+    function appendCreateProjectAction() {
+        projectModel.append({
+            title: qsTr("New Project"),
+            iconSource: "qrc:/qt/qml/hlae_ui/assets/images/icons/new.svg",
+            iconSize: 15,
+            action: "create",
+            projectId: "",
+            demoPath: "",
+            map: ""
+        })
+    }
+
+    function refreshProjects() {
+        const selectedProjectId = projectSelect.currentIndex >= 0 && projectSelect.currentIndex < projectModel.count
+                                ? projectModel.get(projectSelect.currentIndex).projectId
+                                : ""
+
+        projectModel.clear()
+        appendCreateProjectAction()
+
+        const projects = projectManager.list()
+        for (let projectIndex = 0; projectIndex < projects.length; ++projectIndex) {
+            const project = projects[projectIndex]
+            projectModel.append({
+                title: project.name,
+                iconSource: projectIconSource(project.map),
+                iconSize: 30,
+                action: "load",
+                projectId: project.id,
+                demoPath: project.demoPath,
+                map: project.map
+            })
+        }
+
+        projectSelect.currentIndex = -1
+        if (selectedProjectId !== "") {
+            for (let modelIndex = 1; modelIndex < projectModel.count; ++modelIndex) {
+                if (projectModel.get(modelIndex).projectId === selectedProjectId) {
+                    projectSelect.currentIndex = modelIndex
+                    return
+                }
+            }
+        }
+    }
+
+    function quoteConsoleArgument(value) {
+        return "\"" + String(value).replace(/"/g, "\\\"") + "\""
+    }
+
+    function loadProject(projectId) {
+        projectError = ""
+
+        const result = projectManager.load(projectId)
+        if (!result.valid) {
+            projectError = result.error
+            return
+        }
+
+        console.info("Loading project:")
+        console.info("\tName: " + result.name)
+        console.info("\tMap: " + result.map)
+        console.info("\tDemo: " + result.demoPath.split("\\").pop())
+
+        projectLoaded(result.id)
+        consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")
+    }
+
+    Component.onCompleted: refreshProjects()
+
+    Popup {
+        id: projectCreateModal
+
+        visible: false
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+        padding: 15
+
+        Overlay.modal: Rectangle {
+            color: Colors.dimBackground
+        }
+
+        background: Rectangle {
+            color: Colors.panelBackground
+            border.color: Colors.border
+            border.width: 1
+            radius: 11
+        }
+
+        contentItem: ColumnLayout {
+            property int labelWidth: 180
+            property int fieldWidth: 200
+
+            spacing: 10
+
+            AppLabelTextField {
+                id: projectCreateName
+
+                labelWidth: labelWidth
+                fieldWidth: fieldWidth
+                labelText: qsTr("Project name")
+                supportingText: text === "" ? qsTr("Enter your project name here") : qsTr("Project folder will be called '%1'").arg(projectManager.normalizeProjectName(text))
+                useSupportingText: true
+            }
+
+            AppValidatedTextField {
+                id: projectCreateDemoPath
+
+                labelWidth: labelWidth
+                fieldWidth: fieldWidth
+                labelText: qsTr("Demo Path")
+                placeholderText: qsTr("C:\\path\\to\\demo.dem")
+                supportingTextElide: Text.ElideMiddle
+                validateEmptyText: true
+                validator: function(value) {
+                    return pathValidator.validateDemoFile(value)
+                }
+
+                onTextEdited: projectCreateError.text = ""
+            }
+
+            Label {
+                id: projectCreateError
+                color: Colors.error
+            }
+
+            Item {
+                height: 50
+            }
+
+            RowLayout {
+                id: projectCreateButtons
+
+                property int buttonHeight: 43
+                property int pixelSizes: 15
+
+                AppButton {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 3
+                    Layout.preferredHeight: projectCreateButtons.buttonHeight
+                    pixelSize: projectCreateButtons.pixelSizes
+                    text: "Cancel"
+                    color: "#f00"
+
+                    onClicked: projectCreateModal.visible = false
+                }
+
+                AppButton {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 2
+                    Layout.preferredHeight: projectCreateButtons.buttonHeight
+                    pixelSize: projectCreateButtons.pixelSizes
+                    text: "Create"
+                    color: "#0c2"
+
+                    onClicked: {
+                        projectCreateError.text = ""
+                        if (!projectCreateDemoPath.validate()) {
+                            return
+                        }
+
+                        const result = projectManager.create(projectCreateName.text, projectCreateDemoPath.text)
+
+                        if (result.valid) {
+                            projectCreateModal.visible = false
+                            launcher.refreshProjects()
+                        } else {
+                            projectCreateError.text = result.error
+                        }
+                    }
+                }
+            }
+        }
     }
 
     ColumnLayout {
@@ -67,41 +265,63 @@ Item {
         ComboBox {
             id: projectSelect
 
-            model: ["Epic edit", "Inferno Montage"]
+            textRole: "title"
+            valueRole: "action"
 
-            Layout.fillWidth: true;
+            readonly property int iconColumnWidth: 30
+            readonly property int selectedIconSize: currentIndex >= 0 && currentIndex < projectModel.count
+                                                   ? projectModel.get(currentIndex).iconSize
+                                                   : 18
+            readonly property string selectedIconSource: currentIndex >= 0 && currentIndex < projectModel.count
+                                                         ? projectModel.get(currentIndex).iconSource
+                                                         : "qrc:/qt/qml/hlae_ui/assets/images/icons/mapIcon.svg"
+            readonly property string selectedTitle: currentIndex >= 0 && currentIndex < projectModel.count
+                                                    ? currentText
+                                                    : qsTr("Select a project")
+
+            model: ListModel {
+                id: projectModel
+            }
+
+            Layout.fillWidth: true
             Layout.preferredHeight: 50
+            leftPadding: 12
+            rightPadding: 40
 
             contentItem: RowLayout {
-                Image {
-                    source: "qrc:/qt/qml/hlae_ui/assets/images/maps/icons/de_inferno.svg"
-                    Layout.preferredHeight: 30
-                    Layout.preferredWidth: 30
-                    Layout.leftMargin: 10
+                spacing: 10
 
-                    sourceSize.width: 30 * Screen.devicePixelRatio
-                    sourceSize.height: 30 * Screen.devicePixelRatio
+                Image {
+                    source: projectSelect.selectedIconSource
+                    Layout.preferredWidth: projectSelect.iconColumnWidth
+                    Layout.preferredHeight: projectSelect.iconColumnWidth
+                    sourceSize.width: projectSelect.selectedIconSize * Screen.devicePixelRatio
+                    sourceSize.height: projectSelect.selectedIconSize * Screen.devicePixelRatio
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                 }
 
-                Text {
-                    text: projectSelect.currentText
+                Label {
+                    text: projectSelect.selectedTitle
                     font.pixelSize: 16
                     color: Colors.text
-                    leftPadding: 5
-                }
-
-                Item {
                     Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
 
-            indicator: Text {
-                text: "⌄"
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.rightMargin: 12
+            indicator: Image {
+                width: 10
+                height: 10
+                x: projectSelect.width - width - 16
+                y: projectSelect.topPadding + (projectSelect.availableHeight - height) / 2
+
+                source: "qrc:/qt/qml/hlae_ui/assets/images/icons/dropdown.svg"
+                sourceSize.width: width * Screen.devicePixelRatio
+                sourceSize.height: height * Screen.devicePixelRatio
+                fillMode: Image.PreserveAspectFit
+                smooth: true
             }
 
             background: Rectangle {
@@ -109,14 +329,67 @@ Item {
                 color: Colors.panelBackground
                 radius: 8
                 border.width: 1
+            }
 
+            onActivated: function(index) {
+                const project = projectModel.get(index)
+                if (project.action === "create") {
+                    projectCreateModal.open()
+                    projectSelect.currentIndex = -1
+                } else {
+                    launcher.loadProject(project.projectId)
+                }
             }
 
             delegate: ItemDelegate {
-                text: modelData
-                width: parent.width
-                height: 40
+                id: projectDelegate
+
+                required property int index
+                required property string title
+                required property string iconSource
+                required property int iconSize
+
+                width: projectSelect.width
+                height: 44
+                highlighted: projectSelect.highlightedIndex === index
+
+                contentItem: RowLayout {
+                    spacing: 10
+
+                    Image {
+                        source: projectDelegate.iconSource
+                        Layout.preferredWidth: projectSelect.iconColumnWidth
+                        Layout.preferredHeight: projectSelect.iconColumnWidth
+                        sourceSize.width: projectDelegate.iconSize * Screen.devicePixelRatio
+                        sourceSize.height: projectDelegate.iconSize * Screen.devicePixelRatio
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                    }
+
+                    Label {
+                        text: projectDelegate.title
+                        color: Colors.text
+                        font.pixelSize: 15
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
+                background: Rectangle {
+                    color: projectDelegate.highlighted ? Colors.hoverBackground : Colors.panelBackground
+                    radius: 6
+                }
             }
+        }
+
+        Label {
+            Layout.fillWidth: true
+            text: launcher.projectError
+            color: Colors.error
+            font.pixelSize: 14
+            wrapMode: Text.Wrap
+            visible: text.length > 0
         }
 
         Item {

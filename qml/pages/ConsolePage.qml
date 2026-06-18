@@ -5,9 +5,9 @@ import hlae_ui
 import "../controls"
 
 Item {
-    ConsoleBridge {
-        id: consoleBridge
-    }
+    id: consolePage
+
+    required property var consoleBridge
 
     ColumnLayout {
         anchors.fill: parent
@@ -32,13 +32,13 @@ Item {
             onAccepted: {
                 const command = text
                 clear()
-                consoleBridge.sendCommand(command)
+                consolePage.consoleBridge.sendCommand(command)
             }
         }
 
         Label {
             Layout.fillWidth: true
-            text: consoleBridge.statusMessage
+            text: consolePage.consoleBridge.statusMessage
             color: Colors.mutedText
             font.pixelSize: 13
             wrapMode: Text.Wrap

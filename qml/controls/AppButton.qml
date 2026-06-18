@@ -6,6 +6,7 @@ Button {
     id: control
 
     property color color: Colors.accent
+    property int pixelSize: 16
 
     function blendColor(baseColor, tintColor, amount) {
         const baseAmount = 1 - amount
@@ -38,7 +39,7 @@ Button {
     contentItem: Text {
         text: control.text
         color: control.enabled ? Colors.text : Colors.disabledText
-        font.pixelSize: 16
+        font.pixelSize: control.pixelSize
         font.weight: Font.DemiBold
         font.letterSpacing: 0.25
         verticalAlignment: Text.AlignVCenter

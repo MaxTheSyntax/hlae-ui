@@ -15,6 +15,7 @@ public:
     explicit PathValidator(QObject *parent = nullptr);
 
     Q_INVOKABLE QVariantMap containsExecutable(const QString &path, const QString &executable) const;
+    Q_INVOKABLE QVariantMap validateDemoFile(const QString &path) const;
 };
 
 #endif // PATHVALIDATOR_H

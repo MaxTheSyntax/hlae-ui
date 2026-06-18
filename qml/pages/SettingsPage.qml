@@ -5,6 +5,10 @@ import hlae_ui
 import "../controls"
 
 Item {
+    id: settingsPage
+
+    signal refreshProjectsRequested()
+
     Settings {
         property alias hlaeExecutablePath: hlaeExe.text
         property alias cs2ExecutablePath: cs2Exe.text
@@ -27,15 +31,8 @@ Item {
             labelText: qsTr("HLAE.exe file location")
             placeholderText: qsTr("C:\\path\\to\\HLAE\\HLAE.exe")
             text: "C:\\Program Files (x86)\\HLAE\\HLAE.exe"
-
-            onVerifiedEdit: {
-                if (text === "") {
-                    return
-                }
-
-                const result = pathValidator.containsExecutable(text, "HLAE.exe")
-                hasError = !result.valid
-                validationError = result.error
+            validator: function(value) {
+                return pathValidator.containsExecutable(value, "HLAE.exe")
             }
         }
 
@@ -47,14 +44,8 @@ Item {
             placeholderText: qsTr("C:\\path\\to\\cs2.exe")
             text: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Global Offensive\\game\\bin\\win64\\cs2.exe"
 
-            onVerifiedEdit: {
-                if (text === "") {
-                    return
-                }
-
-                const result = pathValidator.containsExecutable(text, "cs2.exe")
-                hasError = !result.valid
-                validationError = result.error
+            validator: function(value) {
+                return pathValidator.containsExecutable(value, "cs2.exe")
             }
         }
 
@@ -66,21 +57,37 @@ Item {
             placeholderText: qsTr("-steam -insecure ...")
             text: "-steam -insecure +sv_lan 1 -window -console -novid -afxDisableSteamStorage"
 
-            onVerifiedEdit: {
-                if (text === "") {
-                    return
-                }
-
-                const args = text.split(" ")
+            validator: function(value) {
+                const args = value.split(" ")
 
                 if (args.includes("-w") || args.includes("-h")) {
-                    hasError = true
-                    validationError = "Set window dimensions in the launcher."
-                } else if (!text.includes("-insecure")) {
-                    hasError = true
-                    validationError = "Please set the -insecure flag."
+                    return {
+                        valid: false,
+                        error: qsTr("Set window dimensions in the launcher.")
+                    }
+                }
+
+                if (!value.includes("-insecure")) {
+                    return {
+                        valid: false,
+                        error: qsTr("Please set the -insecure flag.")
+                    }
+                }
+
+                return {
+                    valid: true,
+                    error: ""
                 }
             }
+        }
+
+        AppButton {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 44
+            text: qsTr("Refresh Projects")
+            color: "#0c57ad"
+
+            onClicked: settingsPage.refreshProjectsRequested()
         }
 
         Item {
