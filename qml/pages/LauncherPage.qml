@@ -53,7 +53,7 @@ Item {
             title: qsTr("New Project"),
             iconSource: "qrc:/qt/qml/hlae_ui/assets/images/icons/new.svg",
             iconSize: Sizes.iconSmall,
-            action: "create",
+            projectAction: "create",
             projectId: "",
             demoPath: "",
             map: ""
@@ -75,7 +75,7 @@ Item {
                 title: project.name,
                 iconSource: projectIconSource(project.map),
                 iconSize: Sizes.iconLarge,
-                action: "load",
+                projectAction: "load",
                 projectId: project.id,
                 demoPath: project.demoPath,
                 map: project.map
@@ -376,7 +376,7 @@ Item {
             id: projectSelect
 
             textRole: "title"
-            valueRole: "action"
+            valueRole: "projectAction"
 
             readonly property int iconColumnWidth: Sizes.comboBoxIconColumnWidth
             readonly property int selectedIconSize: currentIndex >= 0 && currentIndex < projectModel.count
@@ -443,7 +443,7 @@ Item {
 
             onActivated: function(index) {
                 const project = projectModel.get(index)
-                if (project.action === "create") {
+                if (project.projectAction === "create") {
                     projectCreateModal.open()
                     projectSelect.currentIndex = -1
                 } else {
@@ -458,7 +458,7 @@ Item {
                 required property string title
                 required property string iconSource
                 required property int iconSize
-                required property string action
+                required property string projectAction
                 required property string projectId
 
                 width: projectSelect.width
@@ -501,7 +501,7 @@ Item {
                         Layout.preferredHeight: 28
                         implicitWidth: 28 // have to set implicit sizing too or it gives warnings
                         implicitHeight: 28
-                        visible: projectDelegate.action === "load"
+                        visible: projectDelegate.projectAction === "load"
                         enabled: visible
 
                         contentItem: Image {

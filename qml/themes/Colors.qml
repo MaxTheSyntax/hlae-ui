@@ -17,6 +17,6 @@ QtObject {
     readonly property color error: "#ef4444"
     readonly property color primaryAction: "#0c57ad"
     readonly property color dangerAction: "#8c150a"
-    readonly property color cancelAction: "#f00"
+    readonly property color cancelAction: "#444455"
     readonly property color successAction: "#0c2"
 }
