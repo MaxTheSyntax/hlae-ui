@@ -7,7 +7,7 @@ ApplicationWindow {
     width: Sizes.windowWidth
     height: Sizes.windowHeight
     visible: true
-    title: "Sidebar example"
+    title: "HLAE UI"
     color: Colors.background
 
     palette.window: Colors.background
