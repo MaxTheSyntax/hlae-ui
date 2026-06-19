@@ -72,6 +72,7 @@ qt_add_qml_module(appqt_hlae
         qml/controls/AppSettingTextField.qml
         qml/pages/LauncherPage.qml
         qml/controls/AppButton.qml
+        qml/controls/AppMenu.qml
 
     SOURCES
         main.cpp
@@ -89,6 +90,7 @@ qt_add_qml_module(appqt_hlae
         assets/images/icons/dropdown.svg
         assets/images/icons/new.svg
         RESOURCES assets/images/icons/mapIcon.svg
+        RESOURCES assets/images/icons/ellipsis.svg
 )
 
 target_include_directories(appqt_hlae
