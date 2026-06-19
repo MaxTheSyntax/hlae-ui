@@ -20,21 +20,21 @@ TextField {
         Qt.callLater(updateFades)
     }
 
-    implicitHeight: 36
+    implicitHeight: Sizes.textFieldHeight
     clip: true
     color: Colors.text
     placeholderTextColor: Colors.mutedText
     selectionColor: Colors.accent
     selectedTextColor: Colors.background
-    font.pixelSize: 14
+    font.pixelSize: Sizes.textSmall
 
     background: Rectangle {
         color: Colors.secondaryBackground
         border.color: control.hasError
-                      ? "#ef4444"
+                      ? Colors.error
                       : (control.activeFocus ? Colors.accent : Colors.hoverBackground)
-        border.width: 1
-        radius: 4
+        border.width: Sizes.controlBorderWidth
+        radius: Sizes.controlRadiusSmall
     }
 
     Component.onCompleted: scheduleFadeUpdate()
@@ -49,9 +49,9 @@ TextField {
             left: parent.left
             top: parent.top
             bottom: parent.bottom
-            margins: 1
+            margins: Sizes.textFieldFadeInset
         }
-        width: 24
+        width: Sizes.textFieldFadeWidth
         visible: control.fadeLeft
         z: 10
 
@@ -74,9 +74,9 @@ TextField {
             right: parent.right
             top: parent.top
             bottom: parent.bottom
-            margins: 1
+            margins: Sizes.textFieldFadeInset
         }
-        width: 24
+        width: Sizes.textFieldFadeWidth
         visible: control.fadeRight
         z: 10
 

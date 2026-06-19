@@ -12,7 +12,7 @@ RowLayout {
     property string activeProject
 
     anchors.fill: parent
-    spacing: 0
+    spacing: Sizes.spacingNone
 
     ConsoleBridge {
         id: sourceConsole
@@ -30,19 +30,19 @@ RowLayout {
 
     // Sidebar
     Rectangle {
-        Layout.preferredWidth: 180
+        Layout.preferredWidth: Sizes.sidebarWidth
         Layout.fillHeight: true
         color: Colors.secondaryBackground
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 8
+            anchors.margins: Sizes.sidebarMargin
+            spacing: Sizes.spacingMedium
 
             Label {
                 text: "HLAE"
-                font.pixelSize: 22
-                Layout.bottomMargin: 16
+                font.pixelSize: Sizes.textAppTitle
+                Layout.bottomMargin: Sizes.sidebarTitleBottomMargin
             }
 
             Repeater {
@@ -58,9 +58,9 @@ RowLayout {
 
                     background: Rectangle {
                         color: sidebarButton.hovered ? Colors.hoverBackground : Colors.secondaryBackground
-                        topLeftRadius: 8
-                        topRightRadius: 8
-                        bottomRightRadius: sidebarButton.isCurrentPage ? 0 : 8
+                        topLeftRadius: Sizes.controlRadiusLarge
+                        topRightRadius: Sizes.controlRadiusLarge
+                        bottomRightRadius: sidebarButton.isCurrentPage ? 0 : Sizes.controlRadiusLarge
 
                         Behavior on color {
                             ColorAnimation {
@@ -78,7 +78,7 @@ RowLayout {
                         Rectangle {
                             anchors.left: parent.left
                             anchors.bottom: parent.bottom
-                            height: sidebarButton.isCurrentPage ? 3 : 2
+                            height: sidebarButton.isCurrentPage ? Sizes.sidebarUnderlineHeight : Sizes.sidebarUnderlineHeightInactive
                             width: sidebarButton.hovered && !sidebarButton.isCurrentPage ? parent.width * 0.9 : parent.width
 
                             color: Colors.selectedAccent
@@ -100,7 +100,7 @@ RowLayout {
                     }
 
                     contentItem: Text {
-                        font.pixelSize: 16
+                        font.pixelSize: Sizes.text
                         text: app.pageNames[sidebarButton.modelData]
                         color: Colors.text
                         verticalAlignment: Text.AlignVCenter

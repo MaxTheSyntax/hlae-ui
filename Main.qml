@@ -4,8 +4,8 @@ import "qml"
 import "qml/themes"
 
 ApplicationWindow {
-    width: 900
-    height: 600
+    width: Sizes.windowWidth
+    height: Sizes.windowHeight
     visible: true
     title: "Sidebar example"
     color: Colors.background

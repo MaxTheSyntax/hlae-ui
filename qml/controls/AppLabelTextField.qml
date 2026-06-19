@@ -12,8 +12,8 @@ RowLayout {
     property bool useSupportingText: true
     property string supportingText: ""
     property color supportingTextColor: Colors.mutedText
-    property int labelWidth: 200
-    property int fieldWidth: 300
+    property int labelWidth: Sizes.textFieldDefaultLabelWidth
+    property int fieldWidth: Sizes.textFieldDefaultFieldWidth
     property bool fieldFillWidth: false
     property int supportingTextElide: Text.ElideLeft
     property alias text: textField.text
@@ -24,7 +24,7 @@ RowLayout {
     signal accepted()
     signal fieldActiveFocusChanged(bool activeFocus)
 
-    spacing: 5
+    spacing: Sizes.spacingXSmall
 
     Column {
         Layout.preferredWidth: control.labelWidth

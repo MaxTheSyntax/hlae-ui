@@ -21,8 +21,8 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 24
-        spacing: 10
+        anchors.margins: Sizes.pageMargin
+        spacing: Sizes.spacingLarge
 
         AppSettingTextField {
             id: hlaeExe
@@ -83,9 +83,9 @@ Item {
 
         AppButton {
             Layout.fillWidth: true
-            Layout.preferredHeight: 44
+            Layout.preferredHeight: Sizes.buttonHeightMedium
             text: qsTr("Refresh Projects")
-            color: "#0c57ad"
+            color: Colors.primaryAction
 
             onClicked: settingsPage.refreshProjectsRequested()
         }

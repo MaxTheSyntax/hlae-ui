@@ -15,4 +15,8 @@ QtObject {
     readonly property color dimBackground: "#44000009"
     readonly property color border: "#445"
     readonly property color error: "#ef4444"
+    readonly property color primaryAction: "#0c57ad"
+    readonly property color dangerAction: "#8c150a"
+    readonly property color cancelAction: "#f00"
+    readonly property color successAction: "#0c2"
 }
