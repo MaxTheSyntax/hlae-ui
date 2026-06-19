@@ -280,7 +280,7 @@ Item {
 
             Label {
                 Layout.fillWidth: true
-                text: qsTr("This will permanently delete '%1' and its project files.").arg(launcher.projectDeleteTitle)
+                text: qsTr("This will permanently delete '%1' and its project files.\nExternal files, such as the demo, will be kept.").arg(launcher.projectDeleteTitle)
                 color: Colors.text
                 font.pixelSize: Sizes.text
                 wrapMode: Text.Wrap

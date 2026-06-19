@@ -226,11 +226,15 @@ QVariantMap ProjectManager::remove(QString uuid) {
             continue;
 
         const QString projectPath = project.value(QStringLiteral("projectPath")).toString();
+        const QFileInfo projectDirInfo(projectPath);
         QDir projectDir(projectPath);
         if (!projectDir.exists())
             return invalidResult(tr("Project folder does not exist (%1).").arg(projectPath));
 
         if (!projectDir.removeRecursively())
+            return invalidResult(tr("Unable to delete project folder (%1).").arg(projectPath));
+
+        if (QFileInfo::exists(projectPath) && !projectDirInfo.dir().rmdir(projectDirInfo.fileName()))
             return invalidResult(tr("Unable to delete project folder (%1).").arg(projectPath));
 
         return {
