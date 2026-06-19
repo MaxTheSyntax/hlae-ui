@@ -15,6 +15,8 @@ Item {
     property string runnerError: ""
     property bool runnerHasError: false
     property string projectError: ""
+    property string projectDeleteId: ""
+    property string projectDeleteTitle: ""
 
     signal projectLoaded(string projectId)
 
@@ -51,7 +53,7 @@ Item {
             title: qsTr("New Project"),
             iconSource: "qrc:/qt/qml/hlae_ui/assets/images/icons/new.svg",
             iconSize: Sizes.iconSmall,
-            action: "create",
+            projectAction: "create",
             projectId: "",
             demoPath: "",
             map: ""
@@ -73,7 +75,7 @@ Item {
                 title: project.name,
                 iconSource: projectIconSource(project.map),
                 iconSize: Sizes.iconLarge,
-                action: "load",
+                projectAction: "load",
                 projectId: project.id,
                 demoPath: project.demoPath,
                 map: project.map
@@ -111,6 +113,30 @@ Item {
 
         projectLoaded(result.id)
         consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")
+    }
+
+    function confirmDeleteProject(projectId, projectTitle) {
+        projectError = ""
+        projectDeleteError.text = ""
+        projectDeleteId = projectId
+        projectDeleteTitle = projectTitle
+        projectDeleteModal.open()
+    }
+
+    function deleteProject(projectId) {
+        projectError = ""
+        projectDeleteError.text = ""
+
+        const result = projectManager.remove(projectId)
+        if (result.valid) {
+            projectDeleteModal.visible = false
+            projectDeleteId = ""
+            projectDeleteTitle = ""
+            launcher.refreshProjects()
+        } else {
+            projectDeleteError.text = result.error
+            projectError = result.error
+        }
     }
 
     Component.onCompleted: refreshProjects()
@@ -221,6 +247,90 @@ Item {
         }
     }
 
+    Popup {
+        id: projectDeleteModal
+
+        visible: false
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+        padding: Sizes.modalPadding
+
+        Overlay.modal: Rectangle {
+            color: Colors.dimBackground
+        }
+
+        background: Rectangle {
+            color: Colors.panelBackground
+            border.color: Colors.border
+            border.width: Sizes.controlBorderWidth
+            radius: Sizes.controlRadiusXLarge
+        }
+
+        contentItem: ColumnLayout {
+            spacing: Sizes.spacingLarge
+            width: Sizes.textFieldModalLabelWidth + Sizes.textFieldModalFieldWidth
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Delete project?")
+                color: Colors.text
+                font.pixelSize: Sizes.textTitle
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("This will permanently delete '%1' and its project files.\nExternal files, such as the demo, will be kept.").arg(launcher.projectDeleteTitle)
+                color: Colors.text
+                font.pixelSize: Sizes.text
+                wrapMode: Text.Wrap
+            }
+
+            Label {
+                id: projectDeleteError
+
+                Layout.fillWidth: true
+                color: Colors.error
+                font.pixelSize: Sizes.textSmall
+                wrapMode: Text.Wrap
+                visible: text.length > 0
+            }
+
+            Item {
+                height: Sizes.modalSpacerHeight
+            }
+
+            RowLayout {
+                id: projectDeleteButtons
+
+                property int buttonHeight: Sizes.buttonHeightSmall
+                property int pixelSizes: Sizes.textDelegate
+
+                AppButton {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 3
+                    Layout.preferredHeight: projectDeleteButtons.buttonHeight
+                    pixelSize: projectDeleteButtons.pixelSizes
+                    text: "Cancel"
+                    color: Colors.cancelAction
+
+                    onClicked: projectDeleteModal.visible = false
+                }
+
+                AppButton {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 2
+                    Layout.preferredHeight: projectDeleteButtons.buttonHeight
+                    pixelSize: projectDeleteButtons.pixelSizes
+                    text: "Delete"
+                    color: Colors.dangerAction
+
+                    onClicked: launcher.deleteProject(launcher.projectDeleteId)
+                }
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Sizes.pageMargin
@@ -266,7 +376,7 @@ Item {
             id: projectSelect
 
             textRole: "title"
-            valueRole: "action"
+            valueRole: "projectAction"
 
             readonly property int iconColumnWidth: Sizes.comboBoxIconColumnWidth
             readonly property int selectedIconSize: currentIndex >= 0 && currentIndex < projectModel.count
@@ -333,7 +443,7 @@ Item {
 
             onActivated: function(index) {
                 const project = projectModel.get(index)
-                if (project.action === "create") {
+                if (project.projectAction === "create") {
                     projectCreateModal.open()
                     projectSelect.currentIndex = -1
                 } else {
@@ -348,18 +458,23 @@ Item {
                 required property string title
                 required property string iconSource
                 required property int iconSize
+                required property string projectAction
+                required property string projectId
 
                 width: projectSelect.width
                 height: Sizes.comboBoxDelegateHeight
                 highlighted: projectSelect.highlightedIndex === index
+                padding: 0
 
                 contentItem: RowLayout {
+                    anchors.fill: parent
                     spacing: Sizes.spacingLarge
 
                     Image {
                         source: projectDelegate.iconSource
                         Layout.preferredWidth: projectSelect.iconColumnWidth
                         Layout.preferredHeight: projectSelect.iconColumnWidth
+                        Layout.alignment: Qt.AlignVCenter
                         sourceSize.width: projectDelegate.iconSize * Screen.devicePixelRatio
                         sourceSize.height: projectDelegate.iconSize * Screen.devicePixelRatio
                         fillMode: Image.PreserveAspectFit
@@ -371,8 +486,51 @@ Item {
                         color: Colors.text
                         font.pixelSize: Sizes.textDelegate
                         Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
+                    }
+
+                    Button {
+                        id: projectActionsButton
+
+                        text: "..."
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.rightMargin: Sizes.spacingLarge
+                        Layout.preferredWidth: 28
+                        Layout.preferredHeight: 28
+                        implicitWidth: 28 // have to set implicit sizing too or it gives warnings
+                        implicitHeight: 28
+                        visible: projectDelegate.projectAction === "load"
+                        enabled: visible
+
+                        contentItem: Image {
+                            source: "qrc:/qt/qml/hlae_ui/assets/images/icons/ellipsis.svg"
+                            sourceSize.width: width * Screen.devicePixelRatio
+                            sourceSize.height: height * Screen.devicePixelRatio
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                        }
+
+                        background: Rectangle {
+                            radius: Sizes.controlRadiusMedium
+                            color: projectActionsButton.hovered ? Colors.hoverBackground : Colors.secondaryBackground
+                            border.color: projectActionsButton.hovered ? Colors.border : "transparent"
+                            border.width: Sizes.controlBorderWidth
+                        }
+
+                        onClicked: menu.popup()
+
+                        AppMenu {
+                            id: menu
+
+                            Action {
+                                property color textColor: Colors.error
+
+                                text: "Delete"
+                                onTriggered: launcher.confirmDeleteProject(projectDelegate.projectId, projectDelegate.title)
+                            }
+                        }
                     }
                 }
 

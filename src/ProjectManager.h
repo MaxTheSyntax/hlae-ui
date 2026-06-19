@@ -23,6 +23,9 @@ public:
     /// Open a saved project by its persistent identifier.
     Q_INVOKABLE QVariantMap load(QString uuid);
 
+    /// Delete a saved project by its persistent identifier.
+    Q_INVOKABLE QVariantMap remove(QString uuid);
+
     /// Convert arbitrary text into a filesystem-safe folder label (windows).
     Q_INVOKABLE QString normalizeProjectName(QString s);
 

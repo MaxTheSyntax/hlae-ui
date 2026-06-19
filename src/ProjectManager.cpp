@@ -213,3 +213,38 @@ QVariantMap ProjectManager::load(QString uuid) {
 
     return invalidResult(tr("Unable to find project (%1).").arg(trimmedUuid));
 }
+
+QVariantMap ProjectManager::remove(QString uuid) {
+    const QString trimmedUuid = uuid.trimmed();
+    if (trimmedUuid.isEmpty())
+        return invalidResult(tr("No project selected."));
+
+    const QVariantList projects = list();
+    for (const QVariant &projectVariant : projects) {
+        const QVariantMap project = projectVariant.toMap();
+        if (project.value(QStringLiteral("id")).toString() != trimmedUuid)
+            continue;
+
+        const QString projectPath = project.value(QStringLiteral("projectPath")).toString();
+        const QFileInfo projectDirInfo(projectPath);
+        QDir projectDir(projectPath);
+        if (!projectDir.exists())
+            return invalidResult(tr("Project folder does not exist (%1).").arg(projectPath));
+
+        if (!projectDir.removeRecursively())
+            return invalidResult(tr("Unable to delete project folder (%1).").arg(projectPath));
+
+        if (QFileInfo::exists(projectPath) && !projectDirInfo.dir().rmdir(projectDirInfo.fileName()))
+            return invalidResult(tr("Unable to delete project folder (%1).").arg(projectPath));
+
+        return {
+            {"valid", true},
+            {"error", QString()},
+            {"id", trimmedUuid},
+            {"name", project.value(QStringLiteral("name")).toString()},
+            {"projectPath", projectPath},
+        };
+    }
+
+    return invalidResult(tr("Unable to find project (%1).").arg(trimmedUuid));
+}
