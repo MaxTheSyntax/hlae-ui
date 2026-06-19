@@ -6,7 +6,7 @@ Button {
     id: control
 
     property color color: Colors.accent
-    property int pixelSize: 16
+    property int pixelSize: Sizes.text
 
     function blendColor(baseColor, tintColor, amount) {
         const baseAmount = 1 - amount
@@ -23,9 +23,9 @@ Button {
     }
 
     // implicitWidth: Math.max(132, implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: 52
-    leftPadding: 24
-    rightPadding: 24
+    implicitHeight: Sizes.buttonHeight
+    leftPadding: Sizes.buttonHorizontalPadding
+    rightPadding: Sizes.buttonHorizontalPadding
 
     scale: down ? 0.985 : 1
 
@@ -56,9 +56,9 @@ Button {
     background: Rectangle {
         id: background
 
-        radius: 11
+        radius: Sizes.controlRadiusXLarge
         clip: true
-        border.width: control.activeFocus ? 2 : 1
+        border.width: control.activeFocus ? Sizes.controlFocusBorderWidth : Sizes.controlBorderWidth
         border.color: control.activeFocus
                       ? control.color
                       : control.colorWithAlpha(

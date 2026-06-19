@@ -50,7 +50,7 @@ Item {
         projectModel.append({
             title: qsTr("New Project"),
             iconSource: "qrc:/qt/qml/hlae_ui/assets/images/icons/new.svg",
-            iconSize: 15,
+            iconSize: Sizes.iconSmall,
             action: "create",
             projectId: "",
             demoPath: "",
@@ -72,7 +72,7 @@ Item {
             projectModel.append({
                 title: project.name,
                 iconSource: projectIconSource(project.map),
-                iconSize: 30,
+                iconSize: Sizes.iconLarge,
                 action: "load",
                 projectId: project.id,
                 demoPath: project.demoPath,
@@ -122,7 +122,7 @@ Item {
         modal: true
         focus: true
         anchors.centerIn: Overlay.overlay
-        padding: 15
+        padding: Sizes.modalPadding
 
         Overlay.modal: Rectangle {
             color: Colors.dimBackground
@@ -131,15 +131,15 @@ Item {
         background: Rectangle {
             color: Colors.panelBackground
             border.color: Colors.border
-            border.width: 1
-            radius: 11
+            border.width: Sizes.controlBorderWidth
+            radius: Sizes.controlRadiusXLarge
         }
 
         contentItem: ColumnLayout {
-            property int labelWidth: 180
-            property int fieldWidth: 200
+            property int labelWidth: Sizes.textFieldModalLabelWidth
+            property int fieldWidth: Sizes.textFieldModalFieldWidth
 
-            spacing: 10
+            spacing: Sizes.spacingLarge
 
             AppLabelTextField {
                 id: projectCreateName
@@ -173,14 +173,14 @@ Item {
             }
 
             Item {
-                height: 50
+                height: Sizes.modalSpacerHeight
             }
 
             RowLayout {
                 id: projectCreateButtons
 
-                property int buttonHeight: 43
-                property int pixelSizes: 15
+                property int buttonHeight: Sizes.buttonHeightSmall
+                property int pixelSizes: Sizes.textDelegate
 
                 AppButton {
                     Layout.fillWidth: true
@@ -188,7 +188,7 @@ Item {
                     Layout.preferredHeight: projectCreateButtons.buttonHeight
                     pixelSize: projectCreateButtons.pixelSizes
                     text: "Cancel"
-                    color: "#f00"
+                    color: Colors.cancelAction
 
                     onClicked: projectCreateModal.visible = false
                 }
@@ -199,7 +199,7 @@ Item {
                     Layout.preferredHeight: projectCreateButtons.buttonHeight
                     pixelSize: projectCreateButtons.pixelSizes
                     text: "Create"
-                    color: "#0c2"
+                    color: Colors.successAction
 
                     onClicked: {
                         projectCreateError.text = ""
@@ -223,16 +223,16 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 24
-        spacing: 6
+        anchors.margins: Sizes.pageMargin
+        spacing: Sizes.spacingSmall
 
         RowLayout {
-            spacing: 10
+            spacing: Sizes.spacingLarge
 
             AppButton {
                 Layout.fillWidth: true
                 text: "Launch"
-                color: "#0c57ad"
+                color: Colors.primaryAction
 
                 onClicked: {
                     const result = hlaeRunner.run(
@@ -251,14 +251,14 @@ Item {
             AppButton {
                 Layout.fillWidth: true
                 text: "Kill"
-                color: "#8c150a"
+                color: Colors.dangerAction
             }
         }
 
         Label {
             text: runnerError
-            color: "#ef4444"
-            font.pixelSize: 14
+            color: Colors.error
+            font.pixelSize: Sizes.textSmall
             visible: runnerHasError
         }
 
@@ -268,10 +268,10 @@ Item {
             textRole: "title"
             valueRole: "action"
 
-            readonly property int iconColumnWidth: 30
+            readonly property int iconColumnWidth: Sizes.comboBoxIconColumnWidth
             readonly property int selectedIconSize: currentIndex >= 0 && currentIndex < projectModel.count
                                                    ? projectModel.get(currentIndex).iconSize
-                                                   : 18
+                                                   : Sizes.iconMedium
             readonly property string selectedIconSource: currentIndex >= 0 && currentIndex < projectModel.count
                                                          ? projectModel.get(currentIndex).iconSource
                                                          : "qrc:/qt/qml/hlae_ui/assets/images/icons/mapIcon.svg"
@@ -284,12 +284,12 @@ Item {
             }
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            leftPadding: 12
-            rightPadding: 40
+            Layout.preferredHeight: Sizes.comboBoxHeight
+            leftPadding: Sizes.comboBoxLeftPadding
+            rightPadding: Sizes.comboBoxRightPadding
 
             contentItem: RowLayout {
-                spacing: 10
+                spacing: Sizes.spacingLarge
 
                 Image {
                     source: projectSelect.selectedIconSource
@@ -303,7 +303,7 @@ Item {
 
                 Label {
                     text: projectSelect.selectedTitle
-                    font.pixelSize: 16
+                    font.pixelSize: Sizes.text
                     color: Colors.text
                     Layout.fillWidth: true
                     elide: Text.ElideRight
@@ -312,9 +312,9 @@ Item {
             }
 
             indicator: Image {
-                width: 10
-                height: 10
-                x: projectSelect.width - width - 16
+                width: Sizes.comboBoxIndicatorSize
+                height: Sizes.comboBoxIndicatorSize
+                x: projectSelect.width - width - Sizes.comboBoxIndicatorRightMargin
                 y: projectSelect.topPadding + (projectSelect.availableHeight - height) / 2
 
                 source: "qrc:/qt/qml/hlae_ui/assets/images/icons/dropdown.svg"
@@ -327,8 +327,8 @@ Item {
             background: Rectangle {
                 border.color: Colors.secondaryBackground
                 color: Colors.panelBackground
-                radius: 8
-                border.width: 1
+                radius: Sizes.controlRadiusLarge
+                border.width: Sizes.controlBorderWidth
             }
 
             onActivated: function(index) {
@@ -350,11 +350,11 @@ Item {
                 required property int iconSize
 
                 width: projectSelect.width
-                height: 44
+                height: Sizes.comboBoxDelegateHeight
                 highlighted: projectSelect.highlightedIndex === index
 
                 contentItem: RowLayout {
-                    spacing: 10
+                    spacing: Sizes.spacingLarge
 
                     Image {
                         source: projectDelegate.iconSource
@@ -369,7 +369,7 @@ Item {
                     Label {
                         text: projectDelegate.title
                         color: Colors.text
-                        font.pixelSize: 15
+                        font.pixelSize: Sizes.textDelegate
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
@@ -378,7 +378,7 @@ Item {
 
                 background: Rectangle {
                     color: projectDelegate.highlighted ? Colors.hoverBackground : Colors.panelBackground
-                    radius: 6
+                    radius: Sizes.controlRadiusMedium
                 }
             }
         }
@@ -387,7 +387,7 @@ Item {
             Layout.fillWidth: true
             text: launcher.projectError
             color: Colors.error
-            font.pixelSize: 14
+            font.pixelSize: Sizes.textSmall
             wrapMode: Text.Wrap
             visible: text.length > 0
         }

@@ -11,7 +11,7 @@ AppLabelTextField {
     signal verifiedEdit()
 
     supportingText: control.hasError ? control.validationError : ""
-    supportingTextColor: "#ef4444"
+    supportingTextColor: Colors.error
 
     function resetValidation() {
         control.hasError = false
@@ -52,7 +52,7 @@ AppLabelTextField {
 
     Timer {
         id: validationTimer
-        interval: 1000
+        interval: Sizes.textFieldValidationDelay
         onTriggered: control.validate()
     }
 }

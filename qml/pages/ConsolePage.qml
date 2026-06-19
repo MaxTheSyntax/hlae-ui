@@ -11,13 +11,13 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 24
-        spacing: 10
+        anchors.margins: Sizes.pageMargin
+        spacing: Sizes.spacingLarge
 
         Label {
             text: qsTr("Source 2 Console")
             color: Colors.text
-            font.pixelSize: 20
+            font.pixelSize: Sizes.textTitle
             font.bold: true
         }
 
@@ -25,9 +25,9 @@ Item {
             id: commandInput
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 44
+            Layout.preferredHeight: Sizes.buttonHeightMedium
             placeholderText: qsTr("Type a console command")
-            font.pixelSize: 16
+            font.pixelSize: Sizes.text
 
             onAccepted: {
                 const command = text
@@ -40,7 +40,7 @@ Item {
             Layout.fillWidth: true
             text: consolePage.consoleBridge.statusMessage
             color: Colors.mutedText
-            font.pixelSize: 13
+            font.pixelSize: Sizes.textStatus
             wrapMode: Text.Wrap
             visible: text.length > 0
         }
