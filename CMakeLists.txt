@@ -74,6 +74,7 @@ qt_add_qml_module(appqt_hlae
         qml/controls/AppMenu.qml
         qml/components/SettingTextField.qml
         qml/dialogs/AppDialog.qml
+        qml/dialogs/GameNotOpenDialog.qml
         qml/dialogs/ProjectCreateDialog.qml
         qml/dialogs/ProjectDeleteDialog.qml
 

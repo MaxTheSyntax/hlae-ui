@@ -63,7 +63,7 @@ bool ConsoleBridge::isAvailable()
     return ensureConnected();
 }
 
-bool ConsoleBridge::sendCommand(const QString &command)
+bool ConsoleBridge::sendCommand(const QString &command, const bool showGameNotOpenDialog)
 {
     const QString trimmedCommand = command.trimmed();
     if (trimmedCommand.isEmpty()) {
@@ -72,6 +72,9 @@ bool ConsoleBridge::sendCommand(const QString &command)
 
     if (!ensureConnected()) {
         setStatusMessage(tr("Source console is not available"));
+        if (showGameNotOpenDialog) {
+            emit gameNotOpenDialogRequested();
+        }
         return false;
     }
 
@@ -86,6 +89,9 @@ bool ConsoleBridge::sendCommand(const QString &command)
 
     if (!ensureConnected()) {
         setStatusMessage(tr("Source console is not available"));
+        if (showGameNotOpenDialog) {
+            emit gameNotOpenDialogRequested();
+        }
         return false;
     }
 

@@ -111,8 +111,9 @@ Item {
         console.info("\tMap: " + result.map)
         console.info("\tDemo: " + result.demoPath.split("\\").pop())
 
-        projectLoaded(result.id)
-        consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")
+        if (consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")) {
+            projectLoaded(result.id)
+        }
     }
 
     function confirmDeleteProject(projectId, projectTitle) {
@@ -155,50 +156,8 @@ Item {
         onDeleteRequested: launcher.deleteProject(launcher.projectDeleteId)
     }
 
-    AppDialog {
-        id: warnGameNotOpenModal
-
-        contentItem: ColumnLayout {
-            spacing: Sizes.spacingLarge
-            width: Sizes.textFieldModalLabelWidth + Sizes.textFieldModalFieldWidth
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("Game not launched")
-                color: Colors.text
-                font.pixelSize: Sizes.textTitle
-            }
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("It looks like CS2 isn't running with a reachable VConsole. Please launch it using the \"Launch\" button and try again.")
-                color: Colors.text
-                font.pixelSize: Sizes.text
-                wrapMode: Text.Wrap
-            }
-
-            Item {
-                Layout.preferredHeight: Sizes.modalSpacerHeight
-            }
-
-            RowLayout {
-                id: warnGameNotOpenButtons
-
-                property int buttonHeight: Sizes.buttonHeightSmall
-                property int pixelSizes: Sizes.textDelegate
-
-                AppButton {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1
-                    Layout.preferredHeight: warnGameNotOpenButtons.buttonHeight
-                    pixelSize: warnGameNotOpenButtons.pixelSizes
-                    text: qsTr("OK")
-                    color: Colors.primaryAction
-
-                    onClicked: warnGameNotOpenModal.close()
-                }
-            }
-        }
+    GameNotOpenDialog {
+        consoleBridge: launcher.consoleBridge
     }
 
     ColumnLayout {
@@ -318,11 +277,7 @@ Item {
                     projectCreateDialog.open()
                     projectSelect.currentIndex = -1
                 } else {
-                    if (launcher.consoleBridge.isAvailable()) {
-                        launcher.loadProject(project.projectId)
-                    } else {
-                        warnGameNotOpenModal.open()
-                    }
+                    launcher.loadProject(project.projectId)
                 }
             }
 
