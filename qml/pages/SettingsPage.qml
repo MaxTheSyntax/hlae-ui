@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import hlae_ui
 import "../controls"
+import "../components"
 
 Item {
     id: settingsPage
@@ -24,7 +25,7 @@ Item {
         anchors.margins: Sizes.pageMargin
         spacing: Sizes.spacingLarge
 
-        AppSettingTextField {
+        SettingTextField {
             id: hlaeExe
 
             Layout.fillWidth: true
@@ -36,7 +37,7 @@ Item {
             }
         }
 
-        AppSettingTextField {
+        SettingTextField {
             id: cs2Exe
 
             Layout.fillWidth: true
@@ -49,7 +50,7 @@ Item {
             }
         }
 
-        AppSettingTextField {
+        SettingTextField {
             id: launchArgumentsField
 
             Layout.fillWidth: true
