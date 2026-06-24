@@ -9,7 +9,7 @@ import "../controls"
 AppDialog {
     id: dialog
 
-    required property var consoleBridge
+    required property ConsoleBridge consoleBridge
 
     Connections {
         target: dialog.consoleBridge

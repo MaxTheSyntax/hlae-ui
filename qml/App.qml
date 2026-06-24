@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import hlae_ui
 import "themes"
 import "pages"
+import "./dialogs"
 
 RowLayout {
     id: app
@@ -27,6 +28,10 @@ RowLayout {
         "Console",
         "Settings"
     ]
+
+    GameNotOpenDialog {
+        consoleBridge: sourceConsole
+    }
 
     // Sidebar
     Rectangle {

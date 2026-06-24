@@ -156,10 +156,6 @@ Item {
         onDeleteRequested: launcher.deleteProject(launcher.projectDeleteId)
     }
 
-    GameNotOpenDialog {
-        consoleBridge: launcher.consoleBridge
-    }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Sizes.pageMargin
