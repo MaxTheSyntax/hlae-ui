@@ -111,8 +111,9 @@ Item {
         console.info("\tMap: " + result.map)
         console.info("\tDemo: " + result.demoPath.split("\\").pop())
 
-        projectLoaded(result.id)
-        consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")
+        if (consoleBridge.sendCommand("playdemo " + quoteConsoleArgument(result.demoPath) + "")) {
+            projectLoaded(result.id)
+        }
     }
 
     function confirmDeleteProject(projectId, projectTitle) {
@@ -154,6 +155,7 @@ Item {
 
         onDeleteRequested: launcher.deleteProject(launcher.projectDeleteId)
     }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Sizes.pageMargin

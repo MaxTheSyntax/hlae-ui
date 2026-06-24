@@ -18,10 +18,12 @@ public:
 
     QString statusMessage() const;
 
-    Q_INVOKABLE bool sendCommand(const QString &command);
+    Q_INVOKABLE bool isAvailable();
+    Q_INVOKABLE bool sendCommand(const QString &command, const bool showGameNotOpenDialog = true);
 
 signals:
     void statusMessageChanged();
+    void gameNotOpenDialogRequested();
 
 private:
     void setStatusMessage(const QString &message);
