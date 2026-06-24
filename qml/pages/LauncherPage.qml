@@ -6,6 +6,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import hlae_ui
 import "../controls"
+import "../dialogs"
 
 Item {
     id: launcher
@@ -16,7 +17,6 @@ Item {
     property bool runnerHasError: false
     property string projectError: ""
     property string projectDeleteId: ""
-    property string projectDeleteTitle: ""
 
     signal projectLoaded(string projectId)
 
@@ -117,220 +117,43 @@ Item {
 
     function confirmDeleteProject(projectId, projectTitle) {
         projectError = ""
-        projectDeleteError.text = ""
+        projectDeleteDialog.resetError()
         projectDeleteId = projectId
-        projectDeleteTitle = projectTitle
-        projectDeleteModal.open()
+        projectDeleteDialog.projectTitle = projectTitle
+        projectDeleteDialog.open()
     }
 
     function deleteProject(projectId) {
         projectError = ""
-        projectDeleteError.text = ""
+        projectDeleteDialog.resetError()
 
         const result = projectManager.remove(projectId)
         if (result.valid) {
-            projectDeleteModal.visible = false
+            projectDeleteDialog.close()
             projectDeleteId = ""
-            projectDeleteTitle = ""
             launcher.refreshProjects()
         } else {
-            projectDeleteError.text = result.error
+            projectDeleteDialog.errorText = result.error
             projectError = result.error
         }
     }
 
     Component.onCompleted: refreshProjects()
 
-    Popup {
-        id: projectCreateModal
+    ProjectCreateDialog {
+        id: projectCreateDialog
 
-        visible: false
-        modal: true
-        focus: true
-        anchors.centerIn: Overlay.overlay
-        padding: Sizes.modalPadding
+        projectManagerBackend: projectManager
+        pathValidatorBackend: pathValidator
 
-        Overlay.modal: Rectangle {
-            color: Colors.dimBackground
-        }
-
-        background: Rectangle {
-            color: Colors.panelBackground
-            border.color: Colors.border
-            border.width: Sizes.controlBorderWidth
-            radius: Sizes.controlRadiusXLarge
-        }
-
-        contentItem: ColumnLayout {
-            property int labelWidth: Sizes.textFieldModalLabelWidth
-            property int fieldWidth: Sizes.textFieldModalFieldWidth
-
-            spacing: Sizes.spacingLarge
-
-            AppLabelTextField {
-                id: projectCreateName
-
-                labelWidth: labelWidth
-                fieldWidth: fieldWidth
-                labelText: qsTr("Project name")
-                supportingText: text === "" ? qsTr("Enter your project name here") : qsTr("Project folder will be called '%1'").arg(projectManager.normalizeProjectName(text))
-                useSupportingText: true
-            }
-
-            AppValidatedTextField {
-                id: projectCreateDemoPath
-
-                labelWidth: labelWidth
-                fieldWidth: fieldWidth
-                labelText: qsTr("Demo Path")
-                placeholderText: qsTr("C:\\path\\to\\demo.dem")
-                supportingTextElide: Text.ElideMiddle
-                validateEmptyText: true
-                validator: function(value) {
-                    return pathValidator.validateDemoFile(value)
-                }
-
-                onTextEdited: projectCreateError.text = ""
-            }
-
-            Label {
-                id: projectCreateError
-                color: Colors.error
-            }
-
-            Item {
-                height: Sizes.modalSpacerHeight
-            }
-
-            RowLayout {
-                id: projectCreateButtons
-
-                property int buttonHeight: Sizes.buttonHeightSmall
-                property int pixelSizes: Sizes.textDelegate
-
-                AppButton {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 3
-                    Layout.preferredHeight: projectCreateButtons.buttonHeight
-                    pixelSize: projectCreateButtons.pixelSizes
-                    text: "Cancel"
-                    color: Colors.cancelAction
-
-                    onClicked: projectCreateModal.visible = false
-                }
-
-                AppButton {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 2
-                    Layout.preferredHeight: projectCreateButtons.buttonHeight
-                    pixelSize: projectCreateButtons.pixelSizes
-                    text: "Create"
-                    color: Colors.successAction
-
-                    onClicked: {
-                        projectCreateError.text = ""
-                        if (!projectCreateDemoPath.validate()) {
-                            return
-                        }
-
-                        const result = projectManager.create(projectCreateName.text, projectCreateDemoPath.text)
-
-                        if (result.valid) {
-                            projectCreateModal.visible = false
-                            launcher.refreshProjects()
-                        } else {
-                            projectCreateError.text = result.error
-                        }
-                    }
-                }
-            }
-        }
+        onProjectCreated: launcher.refreshProjects()
     }
 
-    Popup {
-        id: projectDeleteModal
+    ProjectDeleteDialog {
+        id: projectDeleteDialog
 
-        visible: false
-        modal: true
-        focus: true
-        anchors.centerIn: Overlay.overlay
-        padding: Sizes.modalPadding
-
-        Overlay.modal: Rectangle {
-            color: Colors.dimBackground
-        }
-
-        background: Rectangle {
-            color: Colors.panelBackground
-            border.color: Colors.border
-            border.width: Sizes.controlBorderWidth
-            radius: Sizes.controlRadiusXLarge
-        }
-
-        contentItem: ColumnLayout {
-            spacing: Sizes.spacingLarge
-            width: Sizes.textFieldModalLabelWidth + Sizes.textFieldModalFieldWidth
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("Delete project?")
-                color: Colors.text
-                font.pixelSize: Sizes.textTitle
-            }
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("This will permanently delete '%1' and its project files.\nExternal files, such as the demo, will be kept.").arg(launcher.projectDeleteTitle)
-                color: Colors.text
-                font.pixelSize: Sizes.text
-                wrapMode: Text.Wrap
-            }
-
-            Label {
-                id: projectDeleteError
-
-                Layout.fillWidth: true
-                color: Colors.error
-                font.pixelSize: Sizes.textSmall
-                wrapMode: Text.Wrap
-                visible: text.length > 0
-            }
-
-            Item {
-                height: Sizes.modalSpacerHeight
-            }
-
-            RowLayout {
-                id: projectDeleteButtons
-
-                property int buttonHeight: Sizes.buttonHeightSmall
-                property int pixelSizes: Sizes.textDelegate
-
-                AppButton {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 3
-                    Layout.preferredHeight: projectDeleteButtons.buttonHeight
-                    pixelSize: projectDeleteButtons.pixelSizes
-                    text: "Cancel"
-                    color: Colors.cancelAction
-
-                    onClicked: projectDeleteModal.visible = false
-                }
-
-                AppButton {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 2
-                    Layout.preferredHeight: projectDeleteButtons.buttonHeight
-                    pixelSize: projectDeleteButtons.pixelSizes
-                    text: "Delete"
-                    color: Colors.dangerAction
-
-                    onClicked: launcher.deleteProject(launcher.projectDeleteId)
-                }
-            }
-        }
+        onDeleteRequested: launcher.deleteProject(launcher.projectDeleteId)
     }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Sizes.pageMargin
@@ -444,7 +267,8 @@ Item {
             onActivated: function(index) {
                 const project = projectModel.get(index)
                 if (project.projectAction === "create") {
-                    projectCreateModal.open()
+                    projectCreateDialog.reset()
+                    projectCreateDialog.open()
                     projectSelect.currentIndex = -1
                 } else {
                     launcher.loadProject(project.projectId)
