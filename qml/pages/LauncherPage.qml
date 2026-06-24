@@ -331,6 +331,69 @@ Item {
         }
     }
 
+    Popup {
+        id: warnGameNotOpenModal
+
+        visible: false
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+        padding: Sizes.modalPadding
+
+        Overlay.modal: Rectangle {
+            color: Colors.dimBackground
+        }
+
+        background: Rectangle {
+            color: Colors.panelBackground
+            border.color: Colors.border
+            border.width: Sizes.controlBorderWidth
+            radius: Sizes.controlRadiusXLarge
+        }
+
+        contentItem: ColumnLayout {
+            spacing: Sizes.spacingLarge
+            width: Sizes.textFieldModalLabelWidth + Sizes.textFieldModalFieldWidth
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Game not launched")
+                color: Colors.text
+                font.pixelSize: Sizes.textTitle
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("It looks like CS2 isn't running with a reachable VConsole. Please launch it using the \"Launch\" button and try again.")
+                color: Colors.text
+                font.pixelSize: Sizes.text
+                wrapMode: Text.Wrap
+            }
+
+            Item {
+                height: Sizes.modalSpacerHeight
+            }
+
+            RowLayout {
+                id: warnGameNotOpenButtons
+
+                property int buttonHeight: Sizes.buttonHeightSmall
+                property int pixelSizes: Sizes.textDelegate
+
+                AppButton {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.preferredHeight: warnGameNotOpenButtons.buttonHeight
+                    pixelSize: warnGameNotOpenButtons.pixelSizes
+                    text: "OK"
+                    color: Colors.primaryAction
+
+                    onClicked: warnGameNotOpenModal.visible = false
+                }
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Sizes.pageMargin
@@ -447,7 +510,11 @@ Item {
                     projectCreateModal.open()
                     projectSelect.currentIndex = -1
                 } else {
-                    launcher.loadProject(project.projectId)
+                    if (launcher.consoleBridge.isAvailable()) {
+                        launcher.loadProject(project.projectId)
+                    } else {
+                        warnGameNotOpenModal.open()
+                    }
                 }
             }
 

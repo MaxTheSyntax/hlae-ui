@@ -18,6 +18,7 @@ public:
 
     QString statusMessage() const;
 
+    Q_INVOKABLE bool isAvailable();
     Q_INVOKABLE bool sendCommand(const QString &command);
 
 signals:
