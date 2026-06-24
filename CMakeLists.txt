@@ -69,10 +69,13 @@ qt_add_qml_module(appqt_hlae
         qml/controls/AppTextField.qml
         qml/controls/AppLabelTextField.qml
         qml/controls/AppValidatedTextField.qml
-        qml/controls/AppSettingTextField.qml
         qml/pages/LauncherPage.qml
         qml/controls/AppButton.qml
         qml/controls/AppMenu.qml
+        qml/components/SettingTextField.qml
+        qml/dialogs/AppDialog.qml
+        qml/dialogs/ProjectCreateDialog.qml
+        qml/dialogs/ProjectDeleteDialog.qml
 
     SOURCES
         main.cpp
