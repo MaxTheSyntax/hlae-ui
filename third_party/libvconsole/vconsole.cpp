@@ -13,6 +13,7 @@ VConsole::~VConsole()
 
 bool VConsole::connect(const std::string& ip, int port)
 {
+    incomingBuffer.clear();
     clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (clientSocket == INVALID_SOCKET)
     {
@@ -31,11 +32,13 @@ bool VConsole::connect(const std::string& ip, int port)
         return false;
     }
 
+    setSocketNonBlocking(clientSocket);
     return true;
 }
 
 void VConsole::disconnect()
 {
+    incomingBuffer.clear();
     if (clientSocket != INVALID_SOCKET)
     {
         shutdown(clientSocket, SHUT_RDWR);  // Force pending recv/send to return
@@ -57,34 +60,56 @@ bool VConsole::sendCmd(const std::string& cmd)
 
 int VConsole::readChunk(std::vector<char>& outputBuf)
 {
+    if (clientSocket == INVALID_SOCKET)
+    {
+        return -1;
+    }
+
+    char buffer[4096];
+    while (true)
+    {
+        int received = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (received > 0)
+        {
+            incomingBuffer.insert(incomingBuffer.end(), buffer, buffer + received);
+            continue;
+        }
+
+        if (received == 0)
+        {
+            return -1;
+        }
+
+        const int error = SOCKET_ERROR_CODE;
+        if (error == WOULD_BLOCK_ERROR)
+        {
+            break;
+        }
+
+        return -1;
+    }
+
+    if (incomingBuffer.size() < sizeof(VConChunk))
+    {
+        return 0;
+    }
+
     VConChunk header;
-    int n = recv(clientSocket, reinterpret_cast<char*>(&header), sizeof(header), 0);
-    if (n < static_cast<int>(sizeof(VConChunk)))
+    memcpy(&header, incomingBuffer.data(), sizeof(VConChunk));
+    const uint16_t packetLength = ntohs(header.length);
+    if (packetLength < sizeof(VConChunk))
     {
-        if (SOCKET_ERROR_CODE == WOULD_BLOCK_ERROR)
-        {
-            return 0;
-        }
+        incomingBuffer.clear();
         return -1;
     }
 
-    header.version = ntohl(header.version);
-    header.length = ntohs(header.length);
-    header.handle = ntohs(header.handle);
-
-    outputBuf.resize(header.length);
-    memcpy(outputBuf.data(), &header, sizeof(VConChunk));
-
-    int p = recv(clientSocket, outputBuf.data() + sizeof(VConChunk), header.length - sizeof(VConChunk), 0);
-    if (p < static_cast<int>(header.length - sizeof(VConChunk)))
+    if (incomingBuffer.size() < packetLength)
     {
-        if (SOCKET_ERROR_CODE == WOULD_BLOCK_ERROR)
-        {
-            return 0;
-        }
-        return -1;
+        return 0;
     }
 
+    outputBuf.assign(incomingBuffer.begin(), incomingBuffer.begin() + packetLength);
+    incomingBuffer.erase(incomingBuffer.begin(), incomingBuffer.begin() + packetLength);
     return 1;
 }
 

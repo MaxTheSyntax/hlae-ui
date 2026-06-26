@@ -30,7 +30,7 @@ Menu {
             color: !menuItem.enabled
                    ? Colors.disabledText
                    : menuItem.actionTextColor
-            font.pixelSize: Sizes.textSmall
+            font.pixelSize: Sizes.text
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }

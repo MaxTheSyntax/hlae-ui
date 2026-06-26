@@ -1,14 +1,15 @@
 #include "ProjectManager.h"
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
-#include <QVariantMap>
-#include <QVariantList>
+#include <QSaveFile>
 #include <QStandardPaths>
 #include <QUuid>
+#include <QVariantList>
+#include <QVariantMap>
 
 const QDir projectsDir(QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath("HLAE Projects"));
 
@@ -39,6 +40,14 @@ void appendProjectNameSeparator(QString &out)
         out.append(QChar('-'));
 }
 
+QVariantMap validResult()
+{
+    return {
+        {"valid", true},
+        {"error", QString()},
+    };
+}
+
 QVariantMap invalidResult(const QString &error)
 {
     qWarning() << error;
@@ -48,21 +57,35 @@ QVariantMap invalidResult(const QString &error)
     };
 }
 
-QVariantMap projectFromJsonFile(const QString &filePath)
+bool readJsonObject(const QString &filePath, QJsonObject &object, QString &error)
 {
     QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly))
-        return {};
+    if (!file.open(QIODevice::ReadOnly)) {
+        error = QObject::tr("Unable to open project file (%1).").arg(filePath);
+        return false;
+    }
 
     QJsonParseError parseError;
     const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        qWarning() << QObject::tr("Unable to read project file (%1): %2")
-                          .arg(filePath, parseError.errorString());
+        error = QObject::tr("Unable to read project file (%1): %2")
+                    .arg(filePath, parseError.errorString());
+        return false;
+    }
+
+    object = doc.object();
+    return true;
+}
+
+QVariantMap projectFromJsonFile(const QString &filePath)
+{
+    QJsonObject object;
+    QString error;
+    if (!readJsonObject(filePath, object, error)) {
+        qWarning() << error;
         return {};
     }
 
-    const QJsonObject object = doc.object();
     const QString id = object.value(QStringLiteral("id")).toString();
     const QString name = object.value(QStringLiteral("name")).toString();
     const QString demoPath = object.value(QStringLiteral("demoPath")).toString();
@@ -77,8 +100,58 @@ QVariantMap projectFromJsonFile(const QString &filePath)
         {"name", name},
         {"demoPath", demoPath},
         {"map", object.value(QStringLiteral("map")).toString()},
+        {"streams", object.value(QStringLiteral("streams")).toObject().toVariantMap()},
         {"projectPath", QFileInfo(filePath).absolutePath()},
     };
+}
+
+QVariantMap projectDocumentForUuid(const QString &uuid, QJsonObject &object, QString &filePath)
+{
+    const QString trimmedUuid = uuid.trimmed();
+    if (trimmedUuid.isEmpty())
+        return invalidResult(QObject::tr("No project selected."));
+
+    if (!projectsDir.exists())
+        return invalidResult(QObject::tr("Project folder does not exist (%1).").arg(projectsDir.absolutePath()));
+
+    const QFileInfoList projectDirs = projectsDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    for (const QFileInfo &projectDirInfo : projectDirs) {
+        const QString candidatePath = QDir(projectDirInfo.absoluteFilePath()).filePath(QStringLiteral("project.json"));
+        if (!QFileInfo::exists(candidatePath))
+            continue;
+
+        QJsonObject candidateObject;
+        QString error;
+        if (!readJsonObject(candidatePath, candidateObject, error)) {
+            qWarning() << error;
+            continue;
+        }
+
+        if (candidateObject.value(QStringLiteral("id")).toString() != trimmedUuid)
+            continue;
+
+        object = candidateObject;
+        filePath = candidatePath;
+        return validResult();
+    }
+
+    return invalidResult(QObject::tr("Unable to find project (%1).").arg(trimmedUuid));
+}
+
+QVariantMap writeProjectDocument(const QString &filePath, const QJsonObject &object)
+{
+    QSaveFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly))
+        return invalidResult(QObject::tr("Unable to write project file (%1).").arg(filePath));
+
+    const QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Indented);
+    if (file.write(data) != data.size())
+        return invalidResult(QObject::tr("Unable to write project file (%1).").arg(filePath));
+
+    if (!file.commit())
+        return invalidResult(QObject::tr("Unable to save project file (%1).").arg(filePath));
+
+    return validResult();
 }
 }
 
@@ -247,4 +320,57 @@ QVariantMap ProjectManager::remove(QString uuid) {
     }
 
     return invalidResult(tr("Unable to find project (%1).").arg(trimmedUuid));
+}
+
+QVariantMap ProjectManager::streamMetadata(QString uuid)
+{
+    QJsonObject project;
+    QString projectFilePath;
+    QVariantMap result = projectDocumentForUuid(uuid, project, projectFilePath);
+    if (!result.value(QStringLiteral("valid")).toBool())
+        return result;
+
+    result.insert(QStringLiteral("streams"), project.value(QStringLiteral("streams")).toObject().toVariantMap());
+    return result;
+}
+
+QVariantMap ProjectManager::setStreamMetadata(QString uuid, QString streamName, QVariantMap metadata)
+{
+    const QString trimmedStreamName = streamName.trimmed();
+    if (trimmedStreamName.isEmpty())
+        return invalidResult(tr("No stream selected."));
+
+    QJsonObject project;
+    QString projectFilePath;
+    QVariantMap result = projectDocumentForUuid(uuid, project, projectFilePath);
+    if (!result.value(QStringLiteral("valid")).toBool())
+        return result;
+
+    QJsonObject streams = project.value(QStringLiteral("streams")).toObject();
+    QJsonObject stream = streams.value(trimmedStreamName).toObject();
+    const QJsonObject metadataObject = QJsonObject::fromVariantMap(metadata);
+    for (auto it = metadataObject.begin(); it != metadataObject.end(); ++it)
+        stream.insert(it.key(), it.value());
+
+    streams.insert(trimmedStreamName, stream);
+    project.insert(QStringLiteral("streams"), streams);
+    return writeProjectDocument(projectFilePath, project);
+}
+
+QVariantMap ProjectManager::removeStreamMetadata(QString uuid, QString streamName)
+{
+    const QString trimmedStreamName = streamName.trimmed();
+    if (trimmedStreamName.isEmpty())
+        return invalidResult(tr("No stream selected."));
+
+    QJsonObject project;
+    QString projectFilePath;
+    QVariantMap result = projectDocumentForUuid(uuid, project, projectFilePath);
+    if (!result.value(QStringLiteral("valid")).toBool())
+        return result;
+
+    QJsonObject streams = project.value(QStringLiteral("streams")).toObject();
+    streams.remove(trimmedStreamName);
+    project.insert(QStringLiteral("streams"), streams);
+    return writeProjectDocument(projectFilePath, project);
 }

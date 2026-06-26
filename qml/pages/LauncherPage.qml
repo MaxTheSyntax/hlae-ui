@@ -193,7 +193,7 @@ Item {
         Label {
             text: runnerError
             color: Colors.error
-            font.pixelSize: Sizes.textSmall
+            font.pixelSize: Sizes.text
             visible: runnerHasError
         }
 
@@ -371,7 +371,7 @@ Item {
             Layout.fillWidth: true
             text: launcher.projectError
             color: Colors.error
-            font.pixelSize: Sizes.textSmall
+            font.pixelSize: Sizes.text
             wrapMode: Text.Wrap
             visible: text.length > 0
         }

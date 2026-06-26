@@ -19,4 +19,8 @@ QtObject {
     readonly property color dangerAction: "#8c150a"
     readonly property color cancelAction: "#444455"
     readonly property color successAction: "#0c2"
+    readonly property color normalStreamType: "#47ab37"
+    readonly property color normalBackgroundStreamType: "#28382a"
+    readonly property color depthStreamType: "#48545e"
+    readonly property color hudStreamType: "#edd8e6"
 }

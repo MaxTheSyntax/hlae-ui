@@ -26,6 +26,15 @@ public:
     /// Delete a saved project by its persistent identifier.
     Q_INVOKABLE QVariantMap remove(QString uuid);
 
+    /// Return stream metadata stored in the selected project's project.json.
+    Q_INVOKABLE QVariantMap streamMetadata(QString uuid);
+
+    /// Merge stream metadata into the selected project's project.json.
+    Q_INVOKABLE QVariantMap setStreamMetadata(QString uuid, QString streamName, QVariantMap metadata);
+
+    /// Remove stream metadata from the selected project's project.json.
+    Q_INVOKABLE QVariantMap removeStreamMetadata(QString uuid, QString streamName);
+
     /// Convert arbitrary text into a filesystem-safe folder label (windows).
     Q_INVOKABLE QString normalizeProjectName(QString s);
 

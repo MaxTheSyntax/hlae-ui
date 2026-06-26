@@ -1,4 +1,4 @@
-﻿#ifndef VCONSOLE_H
+#ifndef VCONSOLE_H
 #define VCONSOLE_H
 
 #include <string>
@@ -69,6 +69,7 @@ public:
 
 private:
     SOCKET clientSocket;
+    std::vector<char> incomingBuffer;
 
     std::function<void(const PRNT&)> onPRNTReceived;
     std::function<void(const std::vector<Cvar>&)> onCVARsLoaded;

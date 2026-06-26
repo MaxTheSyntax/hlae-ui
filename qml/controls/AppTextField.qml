@@ -26,7 +26,7 @@ TextField {
     placeholderTextColor: Colors.mutedText
     selectionColor: Colors.accent
     selectedTextColor: Colors.background
-    font.pixelSize: Sizes.textSmall
+    font.pixelSize: Sizes.text
 
     background: Rectangle {
         color: Colors.secondaryBackground

@@ -51,6 +51,12 @@ bool socketPeerClosed(SOCKET socket)
 ConsoleBridge::ConsoleBridge(QObject *parent)
     : QObject(parent)
 {
+    m_console.setOnPRNTReceived([this](const PRNT &print) {
+        handleConsolePrint(print);
+    });
+
+    m_pollTimer.setInterval(25);
+    connect(&m_pollTimer, &QTimer::timeout, this, &ConsoleBridge::pollConsoleOutput);
 }
 
 QString ConsoleBridge::statusMessage() const
@@ -104,6 +110,34 @@ bool ConsoleBridge::sendCommand(const QString &command, const bool showGameNotOp
     return false;
 }
 
+bool ConsoleBridge::requestCommandOutput(const QString &requestId,
+                                         const QString &command,
+                                         int timeoutMs)
+{
+    const QString trimmedRequestId = requestId.trimmed();
+    if (trimmedRequestId.isEmpty()) {
+        return false;
+    }
+
+    m_pendingOutputRequests.insert(trimmedRequestId, QStringList{});
+    if (!sendCommand(command)) {
+        m_pendingOutputRequests.remove(trimmedRequestId);
+        stopPollingIfIdle();
+        return false;
+    }
+
+    if (!m_pollTimer.isActive()) {
+        m_pollTimer.start();
+    }
+
+    const int boundedTimeoutMs = timeoutMs < 50 ? 50 : timeoutMs;
+    QTimer::singleShot(boundedTimeoutMs, this, [this, trimmedRequestId]() {
+        finishOutputRequest(trimmedRequestId);
+    });
+
+    return true;
+}
+
 void ConsoleBridge::setStatusMessage(const QString &message)
 {
     if (m_statusMessage == message) {
@@ -126,5 +160,79 @@ bool ConsoleBridge::ensureConnected()
     }
 
     m_connected = m_console.connect();
+    if (m_connected) {
+        setSocketNonBlocking(m_console.getSocket());
+    }
+
     return m_connected;
+}
+
+void ConsoleBridge::handleConsolePrint(const PRNT &print)
+{
+    if (m_pendingOutputRequests.isEmpty()) {
+        return;
+    }
+
+    QString message = QString::fromStdString(print.message);
+    message.replace('\r', '\n');
+
+    const QStringList rawLines = message.split('\n', Qt::SkipEmptyParts);
+    QStringList lines;
+    for (const QString &rawLine : rawLines) {
+        const QString line = rawLine.trimmed();
+        if (!line.isEmpty()) {
+            lines.append(line);
+        }
+    }
+
+    if (lines.isEmpty()) {
+        return;
+    }
+
+    for (auto it = m_pendingOutputRequests.begin(); it != m_pendingOutputRequests.end(); ++it) {
+        it.value().append(lines);
+    }
+}
+
+void ConsoleBridge::pollConsoleOutput()
+{
+    if (!m_connected) {
+        stopPollingIfIdle();
+        return;
+    }
+
+    if (socketPeerClosed(m_console.getSocket())) {
+        m_console.disconnect();
+        m_connected = false;
+        stopPollingIfIdle();
+        return;
+    }
+
+    for (int packetIndex = 0; packetIndex < 64; ++packetIndex) {
+        if (!m_console.processIncomingData()) {
+            break;
+        }
+    }
+
+    stopPollingIfIdle();
+}
+
+void ConsoleBridge::finishOutputRequest(const QString &requestId)
+{
+    const auto it = m_pendingOutputRequests.find(requestId);
+    if (it == m_pendingOutputRequests.end()) {
+        return;
+    }
+
+    const QStringList lines = it.value();
+    m_pendingOutputRequests.erase(it);
+    emit commandOutputReady(requestId, lines);
+    stopPollingIfIdle();
+}
+
+void ConsoleBridge::stopPollingIfIdle()
+{
+    if (m_pendingOutputRequests.isEmpty() && m_pollTimer.isActive()) {
+        m_pollTimer.stop();
+    }
 }

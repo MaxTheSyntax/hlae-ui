@@ -40,7 +40,7 @@ AppDialog {
         Label {
             Layout.fillWidth: true
             color: Colors.error
-            font.pixelSize: Sizes.textSmall
+            font.pixelSize: Sizes.text
             text: dialog.errorText
             wrapMode: Text.Wrap
             visible: text.length > 0

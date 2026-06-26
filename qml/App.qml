@@ -134,7 +134,10 @@ RowLayout {
             }
         }
         OverviewPage {}
-        StreamsPage {}
+        StreamsPage {
+            consoleBridge: sourceConsole
+            activeProjectId: app.activeProject
+        }
         TimelinePage {}
         ConsolePage {
             consoleBridge: sourceConsole

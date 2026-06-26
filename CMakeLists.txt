@@ -63,6 +63,8 @@ qt_add_qml_module(appqt_hlae
         qml/pages/ConsolePage.qml
         qml/pages/SettingsPage.qml
         qml/pages/StreamsPage.qml
+        qml/pages/StreamsListPage.qml
+        qml/pages/StreamSettingsPage.qml
         qml/pages/TimelinePage.qml
         qml/themes/Colors.qml
         qml/themes/Sizes.qml
@@ -73,10 +75,18 @@ qt_add_qml_module(appqt_hlae
         qml/controls/AppButton.qml
         qml/controls/AppMenu.qml
         qml/components/SettingTextField.qml
+        qml/components/StreamDelegate.qml
+        qml/components/StreamSettingToggle.qml
+        qml/components/StreamSettingComboBox.qml
+        qml/components/StreamSettingSegmentedControl.qml
+        qml/components/StreamSettingNumberField.qml
+        qml/components/StreamSettingColor.qml
         qml/dialogs/AppDialog.qml
         qml/dialogs/GameNotOpenDialog.qml
         qml/dialogs/ProjectCreateDialog.qml
         qml/dialogs/ProjectDeleteDialog.qml
+        qml/dialogs/StreamAddDialog.qml
+        qml/dialogs/StreamRemoveDialog.qml
 
     SOURCES
         main.cpp
@@ -95,6 +105,7 @@ qt_add_qml_module(appqt_hlae
         assets/images/icons/new.svg
         RESOURCES assets/images/icons/mapIcon.svg
         RESOURCES assets/images/icons/ellipsis.svg
+        QML_FILES qml/controls/AppBadge.qml
 )
 
 target_include_directories(appqt_hlae

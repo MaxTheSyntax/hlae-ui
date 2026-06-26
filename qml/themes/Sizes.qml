@@ -17,8 +17,8 @@ QtObject {
     readonly property int sidebarMargin: 12
     readonly property int modalPadding: 15
 
-    readonly property int text: 16
-    readonly property int textSmall: 14
+    readonly property int text: 14
+    readonly property int textNormal: text
     readonly property int textStatus: 13
     readonly property int textSubtitle: 11
     readonly property int textDelegate: 15
@@ -31,6 +31,11 @@ QtObject {
     readonly property int controlRadiusMedium: 6
     readonly property int controlRadiusLarge: 8
     readonly property int controlRadiusXLarge: 11
+
+    readonly property int panelRadiusSmall: 4
+    readonly property int panelRadiusMedium: 8
+    readonly property int panelRadiusLarge: 14
+    readonly property int panelRadius: panelRadiusMedium
 
     readonly property int buttonHeight: 52
     readonly property int buttonHorizontalPadding: 24
@@ -53,6 +58,9 @@ QtObject {
     readonly property int iconSmall: 15
     readonly property int iconMedium: 18
     readonly property int iconLarge: 30
+
+    readonly property int badgeHPadding: 5
+    readonly property int badgeVPadding: 1
 
     readonly property int modalSpacerHeight: 50
     readonly property int comboBoxHeight: 50
